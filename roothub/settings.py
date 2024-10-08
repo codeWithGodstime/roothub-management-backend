@@ -10,7 +10,7 @@ SECRET_KEY = config("SECRET_KEY", default="secret_key123")
 
 DEBUG = config("DEBUG", cast=bool, default=False)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS").split(",")
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default='localhost').split(",")
 
 INSTALLED_APPS = [
     "whitenoise.runserver_nostatic", # disable Django’s static file handling and allow WhiteNoise to take over
