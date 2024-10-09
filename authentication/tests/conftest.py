@@ -3,7 +3,7 @@ from pytest_factoryboy import register
 
 from .factories import UserFactory, StudentPresentationFactory, StudentFactory, InstructorFactory
 
-
+pytestmark = pytest.mark.django_db
 
 register(UserFactory)
 register(StudentPresentationFactory)
