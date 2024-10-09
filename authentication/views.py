@@ -27,8 +27,9 @@ class UserViewset(viewsets.ModelViewSet):
         serializer = UserSerializer.UserCreateSerializer(data=copy_data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        message = f"User registration is successful, user credentials has been sent to {copy_data["email"]}"
 
-        return Response({"detail": f"User registration is successful, user credentials has been sent to {copy_data["email"]}"}, status=status.HTTP_201_CREATED)
+        return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
     @extend_schema(
             operation_id="create students",
@@ -43,7 +44,8 @@ class UserViewset(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response({"detail": f"Student registration is successful, user credentials has been sent to {copy_data["email"]}"}, status=status.HTTP_201_CREATED)
+        message =  f"Student registration is successful, user credentials has been sent to {copy_data["email"]}"
+        return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
     @extend_schema(
             operation_id="create instructors",
@@ -57,8 +59,8 @@ class UserViewset(viewsets.ModelViewSet):
         serializer = UserSerializer.InstructorUserCreateSerializer(data=copy_data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-
-        return Response({"detail": f"Instructor registration is successful, user credentials has been sent to {copy_data["email"]}"}, status=status.HTTP_201_CREATED)
+        message = f"Instructor registration is successful, user credentials has been sent to {copy_data["email"]}"
+        return Response({"detail": message}, status=status.HTTP_201_CREATED)
     
 
 class TokenObtainPairView(SimpleJWTTokenObtainPairView):

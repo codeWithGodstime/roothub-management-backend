@@ -14,6 +14,15 @@ faker = Faker()
 def api_client():
     return APIClient()
 
+@pytest.fixture(scope='session', autouse=True)
+def configure_django_settings():
+    settings.SECURE_SSL_REDIRECT = False
+    settings.DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',  # Use SQLite for tests
+        'NAME': ':memory:',  # In-memory database
+        'ATOMIC_REQUESTS': True,  # This enables atomicity for requests
+    }
+
 @pytest.fixture()
 def data():
     return {
@@ -26,12 +35,3 @@ def data():
 @pytest.fixture
 def has_fields() -> Callable[[dict[str, Any], list[str]], bool]:
     return lambda data, fields: all([x in data for x in fields])
-
-@pytest.fixture(scope='session', autouse=True)
-def configure_django_settings():
-    settings.SECURE_SSL_REDIRECT = False
-    settings.DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',  # Use SQLite for tests
-        'NAME': ':memory:',  # In-memory database
-        'ATOMIC_REQUESTS': True,  # This enables atomicity for requests
-    }
