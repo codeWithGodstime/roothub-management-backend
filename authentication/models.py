@@ -23,6 +23,9 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModelMixin):
 
     objects = UserManager()
 
+    class Meta:
+        ordering = ["-created_at"]
+
     def email_user(self, subject, message, from_email=None, **kwargs):
         """Send an email to this user."""
         # send_mail(subject, message, from_email, [self.email], fail_silently=True, **kwargs) #TODO: fix email is not sending 

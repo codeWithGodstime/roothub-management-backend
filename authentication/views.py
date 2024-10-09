@@ -18,8 +18,9 @@ class UserViewset(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
 
     def get_queryset(self):
-        qs = self.queryset.filter(user=self.request.user)
-        return qs
+        if self.request.user.is_staff:
+            return self.queryset  # Admin users can see all users
+        return self.queryset.filter(id=self.request.user.id)
 
     def create(self, request, *args, **kwargs):
         copy_data = request.data.copy()

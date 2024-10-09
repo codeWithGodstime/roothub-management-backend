@@ -54,7 +54,7 @@ class UserSerializer:
     
     class UserRetrieveSerializer(serializers.ModelSerializer):
 
-        user_type_info = serializers.SerializerMethodField()
+        role = serializers.SerializerMethodField()
 
         class Meta:
             model = User
@@ -62,15 +62,21 @@ class UserSerializer:
                 "email", 
                 "first_name", 
                 "last_name", 
-                "user_type_info"
+                "id", 
+                "role"
             )
         
-        def get_user_type_info(self, obj):
+        def get_role(self, obj) -> str:
             if obj.is_student:
                 return "student"
             elif obj.is_instructor:
                 return "instructor"
-            return {}
+            elif obj.is_superuser:
+                return "admin"
+            elif obj.is_staff:
+                return "staff"
+
+            return None
 
 
 class TokenObtainSerializer(SimpleJWTTokenObtainPairSerializer):

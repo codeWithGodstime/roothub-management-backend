@@ -10,6 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY", default="secret_key123")
 
 DEBUG = config("DEBUG", cast=bool, default=False)
+# DEBUG=False
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default='localhost').split(",")
 
@@ -84,7 +85,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'roothub.wsgi.application'
 
-
+print(DEBUG)
 if DEBUG:
     DATABASES = {
         'default': {
@@ -93,6 +94,7 @@ if DEBUG:
         }
     }
 else:
+    print("Uisng this")
     DATABASES = {
         'default': dj_database_url.config(
             default=config("DATABASE_URL", default=""),

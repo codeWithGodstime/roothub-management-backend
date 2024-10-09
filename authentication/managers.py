@@ -8,6 +8,9 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError(_("Email must me set"))
         
+        # when the admin create a staff account
+        extra_fields.setdefault("is_staff", True)
+
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)

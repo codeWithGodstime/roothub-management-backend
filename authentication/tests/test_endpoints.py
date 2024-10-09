@@ -57,3 +57,30 @@ def test_register_instructor(api_client, admin_user, data):
     assert not staff.is_staff
     assert not staff.is_superuser
     assert not staff.is_student
+
+def test_get_all_users(api_client, admin_user, user_factory, has_fields):
+    user_factory.create_batch(10)
+    api_client.force_authenticate(user=admin_user)
+
+    url = reverse("users-list")
+
+    response = api_client.get(url, format='json')
+
+    assert response.status_code == 200
+    assert len(response.data['results']) == 11
+    # assert has_fields(
+    #                 response.data.get("results")[0]
+    #                 if response_data.get("count")
+    #                 else {},
+    #                 required_fields,
+    #             )
+
+def test_get_users_not_admin(api_client, instructor_user, user_factory, has_fields):
+    user_factory.create_batch(10)
+    api_client.force_authenticate(user=instructor_user)
+
+    url = reverse("users-list")
+
+    response = api_client.get(url, format='json')
+
+    assert response.status_code == 403
