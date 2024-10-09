@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY", default="secret_key123")
 
-DEBUG = config("DEBUG", cast=bool, default=False)
+DEBUG = config("DEBUG", cast=bool, default=True)
 # DEBUG=False
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default='localhost').split(",")
@@ -26,7 +26,8 @@ INSTALLED_APPS = [
     # third party apps
     'drf_spectacular',
     "rest_framework",
-    # "simple_jwt",
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     # my apps
     "authentication"
 ]
@@ -85,7 +86,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'roothub.wsgi.application'
 
-print(DEBUG)
+print(type(DEBUG), DEBUG)
 if DEBUG:
     DATABASES = {
         'default': {
