@@ -17,10 +17,12 @@ def api_client():
 @pytest.fixture(scope='session', autouse=True)
 def configure_django_settings():
     settings.SECURE_SSL_REDIRECT = False
-    settings.DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',  # Use SQLite for tests
-        'NAME': ':memory:',  # In-memory database
-        'ATOMIC_REQUESTS': True,  # This enables atomicity for requests
+    settings.DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+            'ATOMIC_REQUESTS': True,  # Ensure this is set
+        }
     }
 
 @pytest.fixture()
