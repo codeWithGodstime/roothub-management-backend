@@ -144,13 +144,15 @@ if DEBUG:
     EMAIL_USE_SSL = False
     EMAIL_HOST_USER = ''
     EMAIL_HOST_PASSWORD = ''
-    print(EMAIL_PORT, EMAIL_HOST)
+
 else:  
-    EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
-    EMAIL_HOST=os.getenv("EMAIL_HOST")
-    EMAIL_PORT=os.getenv("EMAIL_PORT")
-    EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
-    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
+    EMAIL_BACKEND = config("EMAIL_BACKEND")
+    EMAIL_HOST=config("EMAIL_HOST")
+    EMAIL_PORT=config("EMAIL_PORT")
+    EMAIL_USE_TLS = config("EMAIL_USE_TLS")
+    EMAIL_USE_SSL = config("EMAIL_USE_SSL")
+    EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+    EMAIL_HOST_USER = config("EMAIL_HOST_USER")    
 
 DEFAULT_FROM_EMAIL = 'admin@developer.com'
 
