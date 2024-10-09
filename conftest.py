@@ -30,3 +30,8 @@ def has_fields() -> Callable[[dict[str, Any], list[str]], bool]:
 @pytest.fixture(scope='session', autouse=True)
 def configure_django_settings():
     settings.SECURE_SSL_REDIRECT = False
+    settings.DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',  # Use SQLite for tests
+        'NAME': ':memory:',  # In-memory database
+        'ATOMIC_REQUESTS': True,  # This enables atomicity for requests
+    }
