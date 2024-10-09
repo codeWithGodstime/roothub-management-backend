@@ -27,7 +27,7 @@ class UserViewset(viewsets.ModelViewSet):
         serializer = UserSerializer.UserCreateSerializer(data=copy_data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        message = f"User registration is successful, user credentials has been sent to {copy_data["email"]}"
+        message = f"User registration is successful, user credentials has been sent to {copy_data['email']}"
 
         return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
@@ -44,7 +44,7 @@ class UserViewset(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        message =  f"Student registration is successful, user credentials has been sent to {copy_data["email"]}"
+        message =  f"Student registration is successful, user credentials has been sent to {copy_data['email']}"
         return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
     @extend_schema(
@@ -59,7 +59,7 @@ class UserViewset(viewsets.ModelViewSet):
         serializer = UserSerializer.InstructorUserCreateSerializer(data=copy_data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        message = f"Instructor registration is successful, user credentials has been sent to {copy_data["email"]}"
+        message = f"Instructor registration is successful, user credentials has been sent to {copy_data['email']}"
         return Response({"detail": message}, status=status.HTTP_201_CREATED)
     
 
