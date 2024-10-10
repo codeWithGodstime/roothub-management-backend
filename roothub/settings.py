@@ -29,7 +29,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     # my apps
-    "authentication"
+    "authentication",
+    "course"
 ]
 
 REST_FRAMEWORK = {
@@ -86,7 +87,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'roothub.wsgi.application'
 
-print(type(DEBUG), DEBUG)
 if DEBUG:
     DATABASES = {
         'default': {

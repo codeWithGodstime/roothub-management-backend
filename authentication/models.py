@@ -49,11 +49,11 @@ class Student(BaseModelMixin):
     commencement_date = models.DateField()
     #TODO: from the amount paid calculate the number of month paid
     amount_paid = models.DecimalField(decimal_places=2, max_digits=14)
-    course = models.ForeignKey("Course", models.DO_NOTHING)
+    course = models.ForeignKey("course.Course", related_name="students", on_delete=models.DO_NOTHING)
     number_of_presentation = models.PositiveIntegerField(default=0)
     payment_status = models.CharField(max_length=20, choices=payment_status)
     type = models.CharField(max_length=300, choices=type)
-    course_session = models.ForeignKey("CourseSession", models.DO_NOTHING, related_name="students")
+    course_session = models.ForeignKey("course.CourseSession", models.DO_NOTHING, related_name="students")
 
 
 class StudentPresentation(BaseModelMixin):
@@ -62,11 +62,5 @@ class StudentPresentation(BaseModelMixin):
     next_presentation_date = models.DateField(null=True, blank=True)
 
 
-class Course(BaseModelMixin):
-    ...
-
-
-class CourseSession(BaseModelMixin):
-    ...
 
 

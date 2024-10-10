@@ -43,6 +43,9 @@ class UserSerializer:
             user.save()
             return user
     
+    class InstructorUserRetrieveSerializer(UserCreateSerializer):
+        ...
+    
     class StudentUserCreateSerializer(UserCreateSerializer):
 
         def create(self, validated_data):
