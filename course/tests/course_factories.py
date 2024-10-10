@@ -2,7 +2,7 @@ import factory
 import random
 from factory import Faker
 import factory.fuzzy
-from course.models import Course, CourseSession, CourseSessionPayment, CourseTutor
+from course.models import Course, CourseSession, CourseSessionPayment
 
 from faker import Factory as FakerFactory
 

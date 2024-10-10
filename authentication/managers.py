@@ -20,6 +20,7 @@ class UserManager(BaseUserManager):
         return user
 
     def create_student(self, email, password, **extra_fields):
+
         if not email:
             raise ValueError(_("Email must me set"))
 
@@ -37,7 +38,7 @@ class UserManager(BaseUserManager):
 
     def create_instructor(self, email, password, **extra_fields):
         if not email:
-            raise ValueError(_("Email must me set"))
+            raise ValueError(_("Email must be set"))
 
         extra_fields.setdefault("is_instructor", True)
         extra_fields.setdefault("is_active", True)

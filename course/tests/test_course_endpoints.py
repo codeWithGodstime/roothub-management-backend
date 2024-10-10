@@ -7,18 +7,15 @@ pytestmark = [pytest.mark.django_db, pytest.mark.course, pytest.mark.apiTest]
 faker = Faker()
 
 
-def test_admin_can_create_course(api_client, admin_user):
+def test_admin_can_create_course(api_client, admin_user, test_data):
+    data = test_data.generate_test_data('course')
     api_client.force_authenticate(user=admin_user)
     url = reverse("courses-list")
     assert url == "/v1/courses/"
 
-    data = {
-    "name": "Web development",
-    "total_amount": "619552.65",
-    "duration": "3"
-    }
-
     response = api_client.post(url, data, format="json")
+
     assert response.status_code == 201
 
-    assert all(field in list(response.data.keys()) for field in ["name", "total_amount", "duration", "student_count", "instructors"])
+    assert all(field in list(response.data.keys()) for field in ["name", "total_amount", "duration", "student_count", "instructors", "monthly_amount", "active_sessions"])
+

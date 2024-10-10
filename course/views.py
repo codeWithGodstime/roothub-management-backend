@@ -11,6 +11,12 @@ class CourseViewset(viewsets.ModelViewSet):
     serializer_class = CourseSerializer.CourseRetrieveSerializer
     permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
 
+    @extend_schema(
+            request=CourseSerializer.CourseCreateSerializer
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
 
 
     

@@ -28,32 +28,6 @@ class UserSerializer:
             user.email_user("Roothub Account Login Credentials", message, "admin@developer.com")
             user.save()
             return user
-
-    class InstructorUserCreateSerializer(UserCreateSerializer):
-        
-        def create(self, validated_data):
-            generated_password = generate_passwords()
-            user = User.objects.create_instructor(password=generated_password, **validated_data)
-
-            message = f"""
-            Your account details are
-            password: {generated_password}
-            """
-            user.email_user("Roothub Account Login Credentials", message, "admin@developer.com")
-            user.save()
-            return user
-    
-    class InstructorUserRetrieveSerializer(UserCreateSerializer):
-        ...
-    
-    class StudentUserCreateSerializer(UserCreateSerializer):
-
-        def create(self, validated_data):
-            generated_password = generate_passwords()
-            user = User.objects.create_student(password=generated_password, **validated_data)
-            user.save()
-            return user
-
     
     class UserRetrieveSerializer(serializers.ModelSerializer):
 
@@ -80,6 +54,79 @@ class UserSerializer:
                 return "staff"
 
             return None
+
+class StudentSerializer:
+    class StudentCreateSerializer(serializers.ModelSerializer):
+        user = UserSerializer.UserCreateSerializer()
+
+        class Meta:
+            model = Student
+            fields = (
+                "user", "address", "phone_number", "has_paid", "commencement_date", "course", "type", "amount_paid", "payment_status"
+            )
+
+        def create(self, validated_data):
+
+            # extract user data
+            if "user" in validated_data:
+                user = validated_data.pop('user')
+                #create user
+                generated_password = generate_passwords()
+                user = User.objects.create_student(password=generated_password, **user)
+            
+                message = f"""
+                Your account details are
+                password: {generated_password}
+                """
+                user.email_user("Roothub Account Login Credentials", message, "admin@developer.com")
+                user.save()
+
+            student = Student.objects.create(user = user, **validated_data)
+            student.save()
+            return student
+
+    class StudentRetrieveSerializer(serializers.ModelSerializer):
+        user = UserSerializer.UserRetrieveSerializer()
+
+        class Meta:
+            model = Student
+            fields = ("id", "user", "address", "phone_number", "has_paid", "commencement_date", "course", "type", "amount_paid", "payment_status", "date_of_payment", "number_of_presentation")
+
+
+class InstructorSerializer(serializers.ModelSerializer):
+
+    class InstructorCreateSerializer(serializers.ModelSerializer):
+            user = UserSerializer.UserCreateSerializer()
+
+            class Meta:
+                model = Instructor
+                fields = ("user", )
+            
+            def create(self, validated_data):
+
+                # extract user data
+                if "user" in validated_data:
+                    user = validated_data.pop('user')
+                    #create user
+                    generated_password = generate_passwords()
+                    user = User.objects.create_instructor(password=generated_password, **user)
+                
+                    message = f"""
+                    Your account details are
+                    password: {generated_password}
+                    """
+                    user.email_user("Roothub Account Login Credentials", message, "admin@developer.com")
+                    user.save()
+                    
+                instructor = Instructor.objects.create(user = user, **validated_data)
+                instructor.save()
+                
+                return instructor
+    
+    class InstructorRetrieveSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Instructor
+            fields = "__all__"
 
 
 class TokenObtainSerializer(SimpleJWTTokenObtainPairSerializer):
