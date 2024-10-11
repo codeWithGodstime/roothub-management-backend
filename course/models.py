@@ -3,6 +3,7 @@ from datetime import date, timedelta
 from django.db import models
 from utils.model_mixins import BaseModelMixin
 
+from django.db.models import QuerySet
 
 """
 A course represents a general learning path with a name, duration, and payment details.
@@ -53,6 +54,10 @@ class CourseSession(BaseModelMixin):
         # calculate estimated enddate 1 month from the start date
         self.estimated_end_date = self.start_date + timedelta(days=30)
         return super().save(*args, **kwargs)
+
+    def get_session_students(self) -> QuerySet:
+        students = self.students.all()
+        return students
 
 
 class CourseSessionPayment(BaseModelMixin):

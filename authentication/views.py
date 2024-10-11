@@ -44,6 +44,7 @@ class UserViewset(viewsets.ModelViewSet):
     def students(self, request, *args, **kwargs):
         copy_data = request.data.copy()
         
+        # a signal is been triggered to add user to a course session
         serializer = StudentSerializer.StudentCreateSerializer(data=copy_data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -64,7 +65,7 @@ class UserViewset(viewsets.ModelViewSet):
         serializer = InstructorSerializer.InstructorCreateSerializer(data=copy_data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        message = f"Instructor registration is successful, user credentials has been sent to {copy_data["user"]['email']}"
+        message = f"Instructor registration is successful, user credentials has been sent to {copy_data['user']['email']}"
         return Response({"detail": message}, status=status.HTTP_201_CREATED)
     
 

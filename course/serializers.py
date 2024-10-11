@@ -5,11 +5,30 @@ from authentication.models import Instructor
 from .models import Course, CourseSession, CourseSessionPayment
 
 
-class CourseSession:
-    class CourseRetreiveSerializer(serializers.ModelSerializer):
+class CourseSessionSerializer:
+    class CourseSessionRetreiveSerializer(serializers.ModelSerializer):
+
+        number_of_students = serializers.SerializerMethodField()
+
         class Meta:
             model = CourseSession
-            fields = ["start_date", "estimated_end_date", "session_info", "is_active", "end_date", "instructors"]
+            fields = ["id", "start_date", "estimated_end_date", "session_info", "is_active", "end_date", "instructors", "number_of_students"]
+
+        def get_number_of_students(self, obj):
+            return obj.get_session_students().count()
+
+    class CourseSessionUnassignedSerializer(serializers.ModelSerializer):
+        """all sessions without instructors"""
+
+        course = serializers.StringRelatedField()
+        has_instructor = serializers.SerializerMethodField()
+
+        class Meta:
+            model = CourseSession
+            fields = ("course", "has_instructor")
+
+        def get_has_instructor(self, obj):
+            pass
 
 class CourseSerializer:
 
@@ -18,7 +37,6 @@ class CourseSerializer:
             model = Course
             fields = ["name", "total_amount", "duration"]
 
-    
     class CourseRetrieveSerializer(serializers.ModelSerializer):
 
         student_count = serializers.SerializerMethodField()
@@ -32,7 +50,7 @@ class CourseSerializer:
         def get_student_count(self, course) -> int:
             return course.students.all().count()
 
-        def get_instructors(self, course):
+        def get_instructors(self, course) -> InstructorSerializer.InstructorRetrieveSerializer:
             # Retrieve all instructors for this course
             instructors = Instructor.objects.filter(
                 course_session__course=course
@@ -40,7 +58,11 @@ class CourseSerializer:
             serialized_instructors = InstructorSerializer.InstructorRetrieveSerializer(instructors, many=True)
             return serialized_instructors.data
 
-        def get_active_sessions(self, obj):
+        def get_active_sessions(self, obj) -> CourseSessionSerializer.CourseSessionRetreiveSerializer:
             active_course_sessions = obj.sessions.filter(is_active=True)
-            serialized_active_course_sessions =  CourseSession.CourseRetreiveSerializer(active_course_sessions, many=True)
+            serialized_active_course_sessions =  CourseSessionSerializer.CourseSessionRetreiveSerializer(active_course_sessions, many=True)
             return serialized_active_course_sessions.data
+
+    
+
+    
