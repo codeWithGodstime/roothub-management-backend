@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     # my apps
     "authentication",
-    "course"
+    # "course"
 ]
 
 REST_FRAMEWORK = {

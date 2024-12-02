@@ -11,7 +11,7 @@ class UserManager(BaseUserManager):
         
         # when the admin create a staff account
         extra_fields.setdefault("is_staff", True)
-        extra_fields.setdefault("is_active", True)
+        # extra_fields.setdefault("is_active", False)
 
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
@@ -25,7 +25,7 @@ class UserManager(BaseUserManager):
             raise ValueError(_("Email must me set"))
 
         extra_fields.setdefault("is_student", True)
-        extra_fields.setdefault("is_active", True)
+        # extra_fields.setdefault("is_active", True)
 
         if extra_fields.get("is_student") is not True:
             raise ValueError(_("Student must have is_student=True"))
@@ -41,8 +41,7 @@ class UserManager(BaseUserManager):
             raise ValueError(_("Email must be set"))
 
         extra_fields.setdefault("is_instructor", True)
-        extra_fields.setdefault("is_active", True)
-        
+        # extra_fields.setdefault("is_active", True)
 
         if extra_fields.get("is_instructor") is not True:
             raise ValueError(_("Instructor must have is_instructor=True"))
