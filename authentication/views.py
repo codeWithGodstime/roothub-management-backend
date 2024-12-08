@@ -9,10 +9,10 @@ from rest_framework_simplejwt.views import TokenObtainPairView as SimpleJWTToken
 
 from drf_spectacular.utils import extend_schema_field, extend_schema, extend_schema_view, OpenApiParameter
 
-# , StudentSerializer, InstructorSerializer
-from .serializers import UserSerializer, TokenObtainSerializer, ProgramSerializer
-# from .models import Student, Instructor
-from .models import Program
+# , , InstructorSerializer
+from .serializers import UserSerializer, TokenObtainSerializer, ProgramSerializer, StudentSerializer
+# from .models import , Instructor
+from .models import Program, Student
 
 User = get_user_model()
 
@@ -90,39 +90,39 @@ class UserViewset(viewsets.ModelViewSet):
 
         return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
-    # @extend_schema(
-    #         operation_id="create students",
-    #         request=StudentSerializer.StudentCreateSerializer,
-    #         summary="Create a student account endpoint"
-    # )
-    # @action(methods=["post"], detail=False)
-    # @transaction.atomic()
-    # def students(self, request, *args, **kwargs):
-    #     copy_data = request.data.copy()
+    @extend_schema(
+            operation_id="create students",
+            request=StudentSerializer.StudentCreateSerializer,
+            summary="Create a student account endpoint"
+    )
+    @action(methods=["post"], detail=False)
+    @transaction.atomic()
+    def students(self, request, *args, **kwargs):
+        copy_data = request.data.copy()
 
-    #     # a signal is been triggered to add user to a course session
-    #     serializer = StudentSerializer.StudentCreateSerializer(data=copy_data)
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
+        # a signal is been triggered to add user to a course session
+        serializer = StudentSerializer.StudentCreateSerializer(data=copy_data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-    #     message =  f"Student registration is successful, user credentials has been sent to {copy_data['user']['email']}"
-    #     return Response({"detail": message}, status=status.HTTP_201_CREATED)
+        message =  f"Student registration is successful, user credentials has been sent to {copy_data['user']['email']}"
+        return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
-    # @extend_schema(
-    #         operation_id="create instructors",
-    #         request=InstructorSerializer.InstructorCreateSerializer,
-    #         summary="Create a instructor account endpoint"
-    # )
-    # @action(methods=['post'], detail=False)
-    # @transaction.atomic()
-    # def instructors(self, request, *args, **kwargs):
-    #     copy_data = request.data.copy()
+    @extend_schema(
+            operation_id="create instructors",
+            request=InstructorSerializer.InstructorCreateSerializer,
+            summary="Create a instructor account endpoint"
+    )
+    @action(methods=['post'], detail=False)
+    @transaction.atomic()
+    def instructors(self, request, *args, **kwargs):
+        copy_data = request.data.copy()
 
-    #     serializer = InstructorSerializer.InstructorCreateSerializer(data=copy_data)
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     message = f"Instructor registration is successful, user credentials has been sent to {copy_data['user']['email']}"
-    #     return Response({"detail": message}, status=status.HTTP_201_CREATED)
+        serializer = InstructorSerializer.InstructorCreateSerializer(data=copy_data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        message = f"Instructor registration is successful, user credentials has been sent to {copy_data['user']['email']}"
+        return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(tags=['Program'])
@@ -139,11 +139,11 @@ class ProgramViewset(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
-# @extend_schema(tags=['Students'])
-# class StudentViewset(viewsets.ReadOnlyModelViewSet):
-#     queryset = Student.objects.all()
-#     serializer_class = StudentSerializer.StudentRetrieveSerializer
-#     permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
+@extend_schema(tags=['Students'])
+class StudentViewset(viewsets.ReadOnlyModelViewSet):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer.StudentRetrieveSerializer
+    permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
 
 # @extend_schema(tags=['Instructors'])
 # class InstructorViewset(viewsets.ReadOnlyModelViewSet):

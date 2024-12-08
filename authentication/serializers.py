@@ -6,7 +6,7 @@ from faker import Faker
 from decimal import Decimal
 
 # from .models import User, Student, Instructor
-from .models import Program
+from .models import Program, Student
 from utils.util_functions import generate_passwords
 
 User = get_user_model()
@@ -17,8 +17,16 @@ class UserSerializer:
     class UserCreateSerializer(serializers.ModelSerializer):
         class Meta:
             model = User
-            fields = ("email", "first_name", "last_name", "next_of_kin_contact",
-                      "next_of_kin_name", "next_of_kin_email", "next_of_kin_relationship", "home_address")
+            fields = (
+                "email",
+                "first_name",
+                "last_name",
+                "next_of_kin_contact",
+                "next_of_kin_name",
+                "next_of_kin_email",
+                "next_of_kin_relationship",
+                "home_address"
+            )
 
         def validate(self, attrs):
             return super().validate(attrs)
@@ -63,42 +71,57 @@ class UserSerializer:
 
             return None
 
-# class StudentSerializer:
-#     class StudentCreateSerializer(serializers.ModelSerializer):
-#         user = UserSerializer.UserCreateSerializer()
 
-#         class Meta:
-#             model = Student
-#             fields = (
-#                 "user", "address", "phone_number", "has_paid", "commencement_date", "course", "type", "amount_paid", "payment_status"
-#             )
+class StudentSerializer:
+    class StudentCreateSerializer(serializers.ModelSerializer):
+        user = UserSerializer.UserCreateSerializer()
 
-#         def create(self, validated_data):
+        class Meta:
+            model = Student
+            fields = (
+                "user",
+                "program",
+                "type",
+                "payment_plan",
+            )
 
-#             # extract user data
-#             if "user" in validated_data:
-#                 user = validated_data.pop('user')
-#                 #create user
-#                 generated_password = generate_passwords()
-#                 user = User.objects.create_student(password=generated_password, **user)
+        def create(self, validated_data):
 
-#                 message = f"""
-#                 Your account details are
-#                 password: {generated_password}
-#                 """
-#                 user.email_user("Roothub Account Login Credentials", message, "admin@developer.com")
-#                 user.save()
+            # extract user data
+            if "user" in validated_data:
+                user = validated_data.pop('user')
+                # create user
+                generated_password = generate_passwords()
+                user = User.objects.create_student(
+                    password=generated_password, **user
+                )
+        
+                message = f"""
+                Your account details are
+                password: {generated_password}
+                """
+                user.email_user("Roothub Account Login Credentials",
+                                message, "admin@developer.com")
+                user.save()
 
-#             student = Student.objects.create(user = user, **validated_data)
-#             student.save()
-#             return student
+            student = Student.objects.create(user=user, **validated_data)
+            student.save()
+            return student
 
-#     class StudentRetrieveSerializer(serializers.ModelSerializer):
-#         user = UserSerializer.UserRetrieveSerializer()
+    class StudentRetrieveSerializer(serializers.ModelSerializer):
+        user = UserSerializer.UserRetrieveSerializer()
 
-#         class Meta:
-#             model = Student
-#             fields = ("id", "user", "address", "phone_number", "has_paid", "commencement_date", "course", "type", "amount_paid", "payment_status", "date_of_payment", "number_of_presentation")
+        class Meta:
+            model = Student
+            fields = (
+                "id",
+                "user",
+                "program",
+                "type",
+                "created_at",
+                "updated_at",
+                "payment_plan"
+            )
 
 
 # class InstructorSerializer(serializers.ModelSerializer):

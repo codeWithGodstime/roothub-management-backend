@@ -75,28 +75,18 @@ class Program(BaseModelMixin):
 #         User, on_delete=models.DO_NOTHING, related_name="instructor")
 
 
-# class Student(BaseModelMixin):
+class Student(BaseModelMixin):
 
-#     type = {t: t for t in ["INTERN", "EXTERN"]}
-#     payment_status = {p: p for p in ['FULL', "PART", "NOT PAID"]}
+    type = {t: t for t in ["INTERN", "EXTERN", "TRIPTERN"]}
+    payment_plan = {p: p for p in ['FULL', "PART", "NOT PAID"]}
 
-#     user = models.OneToOneField(
-#         User, related_name="student", on_delete=models.DO_NOTHING)
-#     address = models.CharField(max_length=500)
-#     # TODO change to a standard number like 1234 000 000 000 format
-#     phone_number = models.CharField(max_length=11)
-#     has_paid = models.BooleanField(default=False)
-#     date_of_payment = models.DateField(null=True, blank=True)
-#     commencement_date = models.DateField()
-#     # TODO: from the amount paid calculate the number of month paid
-#     amount_paid = models.DecimalField(decimal_places=2, max_digits=14)
-#     course = models.ForeignKey(
-#         "course.Course", related_name="students", on_delete=models.DO_NOTHING)
-#     number_of_presentation = models.PositiveIntegerField(default=0)
-#     payment_status = models.CharField(max_length=20, choices=payment_status)
-#     type = models.CharField(max_length=300, choices=type)
-#     course_session = models.ForeignKey("course.CourseSession", verbose_name="students",
-#                                        related_name='students', on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.OneToOneField(
+        User, related_name="student", on_delete=models.DO_NOTHING)
+    type = models.CharField(max_length=300, choices=type)
+    payment_plan = models.CharField(max_length=30, choices=payment_plan)
+    program = models.ForeignKey(Program, related_name="students", on_delete=models.RESTRICT)
+
+
 
 #     def add_student_to_session(self):
 #         # get all active session for the course
@@ -127,8 +117,8 @@ class Program(BaseModelMixin):
 #         self.course_session = selected_session
 
 
-# class StudentPresentation(BaseModelMixin):
-#     student = models.ForeignKey(
-#         Student, models.DO_NOTHING, related_name="presentations")
-#     previous_presentation_date = models.DateField()
-#     next_presentation_date = models.DateField(null=True, blank=True)
+# # class StudentPresentation(BaseModelMixin):
+# #     student = models.ForeignKey(
+# #         Student, models.DO_NOTHING, related_name="presentations")
+# #     previous_presentation_date = models.DateField()
+# #     next_presentation_date = models.DateField(null=True, blank=True)
