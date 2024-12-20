@@ -9,8 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY", default="secret_key123")
 
-DEBUG = config("DEBUG", cast=bool, default=True)
-# DEBUG=False
+# DEBUG = config("DEBUG", cast=bool, default=False)
+DEBUG=False
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default='localhost').split(",")
 
@@ -86,7 +86,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'roothub.wsgi.application'
-
+print(dj_database_url.parse(config("DATABASE_URL")))
 if DEBUG:
     DATABASES = {
         'default': {
@@ -97,11 +97,12 @@ if DEBUG:
 else:
     DATABASES = {
         'default': dj_database_url.config(
-            default=config("DATABASE_URL", default=""),
+            default=config("DATABASE_URL", default="sqlite:///db.sqlite3"),
             conn_max_age=600,
             conn_health_checks=True,
         )
     }
+    DATABASES['default']['NAME'] = 'postgres'
 
 
 AUTH_PASSWORD_VALIDATORS = [

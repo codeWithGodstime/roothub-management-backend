@@ -108,21 +108,21 @@ class UserViewset(viewsets.ModelViewSet):
         message =  f"Student registration is successful, user credentials has been sent to {copy_data['user']['email']}"
         return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
-    @extend_schema(
-            operation_id="create instructors",
-            request=InstructorSerializer.InstructorCreateSerializer,
-            summary="Create a instructor account endpoint"
-    )
-    @action(methods=['post'], detail=False)
-    @transaction.atomic()
-    def instructors(self, request, *args, **kwargs):
-        copy_data = request.data.copy()
+    # @extend_schema(
+    #         operation_id="create instructors",
+    #         request=InstructorSerializer.InstructorCreateSerializer,
+    #         summary="Create a instructor account endpoint"
+    # )
+    # @action(methods=['post'], detail=False)
+    # @transaction.atomic()
+    # def instructors(self, request, *args, **kwargs):
+    #     copy_data = request.data.copy()
 
-        serializer = InstructorSerializer.InstructorCreateSerializer(data=copy_data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        message = f"Instructor registration is successful, user credentials has been sent to {copy_data['user']['email']}"
-        return Response({"detail": message}, status=status.HTTP_201_CREATED)
+    #     serializer = InstructorSerializer.InstructorCreateSerializer(data=copy_data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     message = f"Instructor registration is successful, user credentials has been sent to {copy_data['user']['email']}"
+    #     return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(tags=['Program'])
