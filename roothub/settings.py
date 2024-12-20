@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY", default="secret_key123")
 
 # DEBUG = config("DEBUG", cast=bool, default=False)
-DEBUG=False
+DEBUG=True
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default='localhost').split(",")
 
@@ -86,7 +86,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'roothub.wsgi.application'
-print(dj_database_url.parse(config("DATABASE_URL")))
+
 if DEBUG:
     DATABASES = {
         'default': {

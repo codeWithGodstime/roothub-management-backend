@@ -102,3 +102,11 @@ class TestAuthenticationEndpoint:
 
         response = api_client.post(url, data, format="json")
         assert response.status_code == 201
+
+    def test_admin_can_view_all_users(self, api_client, admin_user):
+        api_client.force_authenticate(user=admin_user)
+        url = reverse("users-list")
+        assert url == "/v1/users/"
+
+        response = api_client.get(url, format="json")
+        assert response.status_code == 200

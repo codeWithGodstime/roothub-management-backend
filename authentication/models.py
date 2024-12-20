@@ -65,7 +65,7 @@ class Program(BaseModelMixin):
         (4, "4 Months"),
     ]
 
-    name = models.CharField(max_length=300)
+    name = models.CharField(max_length=300, unique=True)
     duration = models.PositiveIntegerField(choices=DURATION_CHOICES)
     total_amount = models.DecimalField(max_digits=16, decimal_places=2)
 

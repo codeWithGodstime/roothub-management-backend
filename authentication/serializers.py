@@ -182,6 +182,23 @@ class ProgramSerializer:
                 data["total_amount"] = float(data["total_amount"])
 
             return data
+    
+    class ProgramUpdateSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Program
+            fields = ['name', "duration", "total_amount"]
+
+        def to_representation(self, instance):
+            """
+            Customize the serialized output to convert Decimal fields to float.
+            """
+            data = super().to_representation(instance)
+            print(data, "representation")
+            # Convert `Decimal` to `float` for specific fields
+            if "total_amount" in data and isinstance(data["total_amount"], Decimal):
+                data["total_amount"] = float(data["total_amount"])
+
+            return data
 
 
 class TokenObtainSerializer(SimpleJWTTokenObtainPairSerializer):

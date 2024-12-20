@@ -29,13 +29,12 @@ class CustomUserAccountCreatePermission(permissions.BasePermission):
         Assumes separate endpoints for staff and student creation.
         """
         # Allow only authenticated users to proceed
-        if not request.user or not request.user.is_authenticated:
+        if not request.user.is_staff or not request.user.is_authenticated:
             return False
 
-        # Check if the request method is POST
-        if request.method == "POST":
-            # Check the endpoint action or role
-            if view.action == "create" and request.user.is_superuser:
+        if view.action == "create":
+
+            if request.user.is_superuser:
                 # Superusers can create staff accounts
                 return True
 
@@ -46,8 +45,8 @@ class CustomUserAccountCreatePermission(permissions.BasePermission):
             # Deny if the action does not match permissions
             return False
 
-        # Deny for any non-POST requests by default
-        return False
+        # Return True for other actions like get
+        return True
 
 
 class CustomAdminOnlyPermission(permissions.BasePermission):
@@ -132,12 +131,20 @@ class ProgramViewset(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, CustomAdminOnlyPermission]
 
     @extend_schema(
-            operation_id="create instructors",
+            operation_id="Create program",
              request=ProgramSerializer.ProgramCreateSerializer,
              summary="Create a program account endpoint"
     )
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
+
+    @extend_schema(
+            operation_id="Update Program",
+             request=ProgramSerializer.ProgramUpdateSerializer,
+             summary="Update program information by the admin"
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
 
 @extend_schema(tags=['Students'])
 class StudentViewset(viewsets.ReadOnlyModelViewSet):
