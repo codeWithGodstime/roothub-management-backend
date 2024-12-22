@@ -88,4 +88,5 @@ class Student(BaseModelMixin):
         User, related_name="student", on_delete=models.DO_NOTHING)
     type = models.CharField(max_length=300, choices=type)
     payment_plan = models.CharField(max_length=30, choices=payment_plan)
-    program = models.ForeignKey(Program, related_name="students", on_delete=models.RESTRICT)
+    program = models.ForeignKey(
+        Program, related_name="students", on_delete=models.RESTRICT)

@@ -11,8 +11,10 @@ from drf_spectacular.utils import extend_schema_field, extend_schema, extend_sch
 
 # , , InstructorSerializer
 from .serializers import UserSerializer, TokenObtainSerializer, ProgramSerializer, StudentSerializer, InstructorSerializer
-# from .models import , Instructor
+
+from course.models import Course
 from .models import Program, Student, Instructor
+
 
 User = get_user_model()
 
@@ -60,7 +62,6 @@ class CustomAdminOnlyPermission(permissions.BasePermission):
         Permission for only superadmin users
         """
         # Allow only authenticated users to proceed
-        print(request.user.is_superuser)
         if request.user.is_superuser:
             return True
         return False
@@ -135,8 +136,29 @@ class ProgramViewset(viewsets.ModelViewSet):
              request=ProgramSerializer.ProgramCreateSerializer,
              summary="Create a program account endpoint"
     )
+    @transaction.atomic()
     def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+
+        # program = super().create(request, *args, **kwargs)
+        serializer = ProgramSerializer.ProgramRetrieveSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        program = serializer.save()
+
+        levels = ["basic", "intermediate", "advanced"]
+        if program.duration == 4:
+            levels = ["beginner", "basic", "intermediate", "advanced"]
+
+        # create course
+        for t in range(program.duration):
+            Course.objects.create(
+                name = f"{program.name}-{levels[t]}",
+                program = program,
+                duration=str(1) #every course last for atleast a month
+            )
+
+        response_data = ProgramSerializer.ProgramRetrieveSerializer(program).data
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
             operation_id="Update Program",
@@ -163,5 +185,4 @@ class TokenObtainPairView(SimpleJWTTokenObtainPairView):
     serializer_class = TokenObtainSerializer
 
     def post(self, request: Request, *args, **kwargs) -> Response:
-
         return super().post(request, *args, **kwargs)

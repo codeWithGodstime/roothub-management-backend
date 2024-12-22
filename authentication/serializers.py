@@ -176,7 +176,6 @@ class ProgramSerializer:
             Customize the serialized output to convert Decimal fields to float.
             """
             data = super().to_representation(instance)
-            print(data, "representation")
             # Convert `Decimal` to `float` for specific fields
             if "total_amount" in data and isinstance(data["total_amount"], Decimal):
                 data["total_amount"] = float(data["total_amount"])
@@ -193,7 +192,6 @@ class ProgramSerializer:
             Customize the serialized output to convert Decimal fields to float.
             """
             data = super().to_representation(instance)
-            print(data, "representation")
             # Convert `Decimal` to `float` for specific fields
             if "total_amount" in data and isinstance(data["total_amount"], Decimal):
                 data["total_amount"] = float(data["total_amount"])

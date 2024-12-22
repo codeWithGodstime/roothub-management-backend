@@ -5,6 +5,7 @@ from drf_spectacular.utils import extend_schema_field, extend_schema, extend_sch
 from .serializers import CourseSerializer
 from .models import Course
 
+
 # @extend_schema(tags=['Course session'])
 # class CourseSessionViewset(viewsets.ModelViewSet):
 #     queryset = CourseSession.objects.all()

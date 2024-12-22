@@ -45,7 +45,6 @@ class TestHelper:
         }
 
     def course_data(self, program: models.Model, instructor: models.Model):
-        print(program.name, "---")
         levels = ["Beginner", "Intermediate", "Advanced"]
         level = random.choice(levels)  # Randomly select a course level
         return {
@@ -56,7 +55,6 @@ class TestHelper:
         }
 
     def generate_test_data(self, type: Literal["user", "instructor", "student", 'program', "course"], *args):
-        print(args)
 
         if type == 'student' and args:
 
