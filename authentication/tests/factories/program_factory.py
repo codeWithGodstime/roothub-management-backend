@@ -7,6 +7,8 @@ from authentication.models import Program
 class ProgramFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Program
+
+    name = factory.Iterator(["web development", 'python', 'data analysis', 'graphics design'])
     duration = factory.Faker(
         "random_element",
         elements=("1", "2", "3", "4")

@@ -1,8 +1,6 @@
-# from rest_framework import serializers
+from rest_framework import serializers
 
-# from authentication.serializers import UserSerializer, InstructorSerializer
-# from authentication.models import Instructor
-# from .models import Course, CourseSession, CourseSessionPayment
+from .models import Course
 
 
 # class CourseSessionSerializer:
@@ -30,38 +28,30 @@
 #         def get_has_instructor(self, obj):
 #             pass
 
-# class CourseSerializer:
+class CourseSerializer:
 
-#     class CourseCreateSerializer(serializers.ModelSerializer):
-#         class Meta:
-#             model = Course
-#             fields = ["name", "total_amount", "duration"]
+    class CourseCreateSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Course
+            fields = [
+                "name", 
+                "program", 
+                "instructor", 
+                "duration"
+            ]
 
-#     class CourseRetrieveSerializer(serializers.ModelSerializer):
+    class CourseRetrieveSerializer(serializers.ModelSerializer):
 
-#         student_count = serializers.SerializerMethodField()
-#         instructors = serializers.SerializerMethodField()
-#         active_sessions = serializers.SerializerMethodField()
+        class Meta:
+            model = Course
+            fields = [
+                "id", 
+                "name", 
+                "program",
+                "duration",  
+                "instructor", 
+            ]
 
-#         class Meta:
-#             model = Course
-#             fields = ["id", "name", "total_amount", "duration", "student_count", "instructors", "monthly_amount", "active_sessions"]
-
-#         def get_student_count(self, course) -> int:
-#             return course.students.all().count()
-
-#         def get_instructors(self, course) -> InstructorSerializer.InstructorRetrieveSerializer:
-#             # Retrieve all instructors for this course
-#             instructors = Instructor.objects.filter(
-#                 course_session__course=course
-#             ).distinct()
-#             serialized_instructors = InstructorSerializer.InstructorRetrieveSerializer(instructors, many=True)
-#             return serialized_instructors.data
-
-#         def get_active_sessions(self, obj) -> CourseSessionSerializer.CourseSessionRetreiveSerializer:
-#             active_course_sessions = obj.sessions.filter(is_active=True)
-#             serialized_active_course_sessions =  CourseSessionSerializer.CourseSessionRetreiveSerializer(active_course_sessions, many=True)
-#             return serialized_active_course_sessions.data
 
     
 

@@ -1,6 +1,7 @@
 from abc import abstractmethod, ABC
 from rest_framework.test import APIClient
 from django.db import models
+from utils.test_helper import compare_dict_data
 
 
 class TestStrategy(ABC):
@@ -35,6 +36,9 @@ class CreateStrategy(TestStrategy):
     def assert_(self):
         assert self.response.status_code == 201
         qs = self.model.objects.filter(**{self.unique_field:self.unique_field_value}).exists()
+
+        # check the response
+        assert compare_dict_data(self.response.data, self.expected_data)
         assert qs
 
 
@@ -106,3 +110,38 @@ class ListStrategy(TestStrategy):
             assert expected_item in response_data, f"Missing item: {expected_item}"
 
 
+class TestStrategyRunner:
+    """
+    A class responsible for executing a given test strategy.
+
+    This class defines a method `execute`, which takes a `TestStrategy` object as an argument, 
+    invokes its `act()` method to perform the strategy's action, and then calls its `assert_()` 
+    method to validate the expected behavior.
+
+    Attributes:
+    None
+
+    Methods:
+    execute(strategy: TestStrategy) -> None:
+        Executes the action and validation steps of the provided strategy.
+    """
+    @classmethod
+    def execute(cls, strategy: TestStrategy):
+        """
+        Executes the action and assertion of a given test strategy.
+
+        This method performs the following steps:
+        1. Calls the `act()` method of the provided strategy to perform its action.
+        2. Calls the `assert_()` method of the provided strategy to validate the result.
+
+        Args:
+        strategy (TestStrategy): A strategy object that implements the `act()` and `assert_()` methods.
+
+        Returns:
+        None
+        """
+        # act
+        strategy.act()
+
+        # assert
+        strategy.assert_()
