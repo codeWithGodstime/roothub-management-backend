@@ -22,18 +22,19 @@ class TestStrategy(ABC):
 
 class CreateStrategy(TestStrategy):
 
-    def __init__(self, client: APIClient, url: str, data: dict, expected_data: list, model: models.Model, unique_field: str):
+    def __init__(self, client: APIClient, url: str, data: dict, expected_data: list, model: models.Model, unique_field: str, unique_value: str):
         super().__init__(client, url, data, expected_data)
         self.model = model
         self.unique_field = unique_field
+        self.unique_field_value = unique_value
 
     def act(self):
         self.response = self.client.post(self.url, self.data, format='json')
+        print(self.response.data, self.response.status_code)
     
     def assert_(self):
         assert self.response.status_code == 201
-        qs = self.model.objects.filter(
-            email=self.data.get(self.unique_field)).exists()
+        qs = self.model.objects.filter(**{self.unique_field:self.unique_field_value}).exists()
         assert qs
 
 
@@ -82,6 +83,7 @@ class DeleteStrategy(TestStrategy):
         exists = self.model.objects.filter(**{self.unique_field: self.unique_value}).exists()
         assert not exists, f"Object with {self.unique_field}={self.unique_value} still exists in the database"
 
+
 class ListStrategy(TestStrategy):
     def __init__(self, client: APIClient, url: str, expected_data: list):
         super().__init__(client, url, {}, expected_data)
@@ -102,3 +104,5 @@ class ListStrategy(TestStrategy):
         
         for expected_item in self.expected_data:
             assert expected_item in response_data, f"Missing item: {expected_item}"
+
+

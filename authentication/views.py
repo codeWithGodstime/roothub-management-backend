@@ -10,9 +10,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView as SimpleJWTToken
 from drf_spectacular.utils import extend_schema_field, extend_schema, extend_schema_view, OpenApiParameter
 
 # , , InstructorSerializer
-from .serializers import UserSerializer, TokenObtainSerializer, ProgramSerializer, StudentSerializer
+from .serializers import UserSerializer, TokenObtainSerializer, ProgramSerializer, StudentSerializer, InstructorSerializer
 # from .models import , Instructor
-from .models import Program, Student
+from .models import Program, Student, Instructor
 
 User = get_user_model()
 
@@ -28,14 +28,14 @@ class CustomUserAccountCreatePermission(permissions.BasePermission):
         Custom permission logic for role-based user creation.
         Assumes separate endpoints for staff and student creation.
         """
+
         # Allow only authenticated users to proceed
         if not request.user.is_staff or not request.user.is_authenticated:
             return False
 
         if view.action == "create":
-
             if request.user.is_superuser:
-                # Superusers can create staff accounts
+                # Superusers can create all accounts
                 return True
 
             if view.action == "students" and request.user.is_staff:
@@ -107,21 +107,21 @@ class UserViewset(viewsets.ModelViewSet):
         message =  f"Student registration is successful, user credentials has been sent to {copy_data['user']['email']}"
         return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
-    # @extend_schema(
-    #         operation_id="create instructors",
-    #         request=InstructorSerializer.InstructorCreateSerializer,
-    #         summary="Create a instructor account endpoint"
-    # )
-    # @action(methods=['post'], detail=False)
-    # @transaction.atomic()
-    # def instructors(self, request, *args, **kwargs):
-    #     copy_data = request.data.copy()
+    @extend_schema(
+            operation_id="create instructors",
+            request=InstructorSerializer.InstructorCreateSerializer,
+            summary="Create a instructor account endpoint"
+    )
+    @action(methods=['post'], detail=False)
+    @transaction.atomic()
+    def instructors(self, request, *args, **kwargs):
+        copy_data = request.data.copy()
 
-    #     serializer = InstructorSerializer.InstructorCreateSerializer(data=copy_data)
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     message = f"Instructor registration is successful, user credentials has been sent to {copy_data['user']['email']}"
-    #     return Response({"detail": message}, status=status.HTTP_201_CREATED)
+        serializer = InstructorSerializer.InstructorCreateSerializer(data=copy_data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        message = f"Instructor registration is successful, user credentials has been sent to {copy_data['user']['email']}"
+        return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(tags=['Program'])
@@ -152,11 +152,11 @@ class StudentViewset(viewsets.ReadOnlyModelViewSet):
     serializer_class = StudentSerializer.StudentRetrieveSerializer
     permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
 
-# @extend_schema(tags=['Instructors'])
-# class InstructorViewset(viewsets.ReadOnlyModelViewSet):
-#     queryset = Instructor.objects.all()
-#     serializer_class = InstructorSerializer.InstructorRetrieveSerializer
-#     permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
+@extend_schema(tags=['Instructors'])
+class InstructorViewset(viewsets.ReadOnlyModelViewSet):
+    queryset = Instructor.objects.all()
+    serializer_class = InstructorSerializer.InstructorRetrieveSerializer
+    permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
 
 
 class TokenObtainPairView(SimpleJWTTokenObtainPairView):

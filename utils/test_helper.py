@@ -1,12 +1,58 @@
+
 import factory
+from faker import Faker
+from typing import Literal
+
 from .strategies import TestStrategy
 
+faker = Faker()
 
 class TestHelper:
-    @classmethod
-    def get_data(cls, type: factory.Factory) -> dict:
-        """ convert a model factory to dict """
-        return factory.build(dict, FACTORY_CLASS=type)
+
+    def student_data(self, program_id:str = None):
+        return {
+            "user": self.user_data(),
+            "payment_plan": faker.random_choices(elements=['FULL', "PART", "NOT PAID"])[0],
+            "type": faker.random_choices(elements=["INTERN", "EXTERN", "TRIPTERN"])[0],
+            "program": program_id,
+        }
+    
+    def instructor_data(self):
+        return {
+            "user": self.user_data()
+        }
+    
+    def user_data(self):
+        return {
+                "email": faker.email(),
+                "first_name": faker.first_name(),
+                "last_name": faker.last_name(),
+                "next_of_kin_name": faker.name(),
+                "next_of_kin_contact": faker.basic_phone_number()[:11],
+                "next_of_kin_email": faker.email(),
+                "next_of_kin_relationship": faker.random_choices(elements=["SISTER", "BROTHER", "FATHER", "SON", "DAUGHTER", "COLLEAGUE"])[0],
+                "home_address": faker.address()
+            }
+    
+    def program_data(self):
+        return {
+            "name": faker.random_choices(elements=["web development", 'python', 'data analysis', 'graphics design'])[0],
+            "total_amount": faker.pydecimal(left_digits=7, min_value=50000, right_digits=2),
+            "duration": faker.random_choices(elements=[x for x in range(1, 4)])[0]
+        } 
+
+    def generate_test_data(self, type: Literal["user", "instructor", "student", 'program'], *args, **kwargs):
+        if type == 'student' and args:
+            program_id = args[0]
+            return self.student_data(program_id=program_id)
+        
+        data_dict = {
+            "user": self.user_data(),
+            "instructor": self.instructor_data(),
+            "program": self.program_data()
+        }
+
+        return data_dict[type]
 
     @staticmethod
     def compare_dict_data(received: dict, expected: list):

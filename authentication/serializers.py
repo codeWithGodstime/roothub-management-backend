@@ -6,7 +6,7 @@ from faker import Faker
 from decimal import Decimal
 
 # from .models import User, Student, Instructor
-from .models import Program, Student
+from .models import Program, Student, Instructor
 from utils.util_functions import generate_passwords
 
 User = get_user_model()
@@ -124,40 +124,40 @@ class StudentSerializer:
             )
 
 
-# class InstructorSerializer(serializers.ModelSerializer):
+class InstructorSerializer(serializers.ModelSerializer):
 
-#     class InstructorCreateSerializer(serializers.ModelSerializer):
-#             user = UserSerializer.UserCreateSerializer()
+    class InstructorCreateSerializer(serializers.ModelSerializer):
+            user = UserSerializer.UserCreateSerializer()
 
-#             class Meta:
-#                 model = Instructor
-#                 fields = ("user", )
+            class Meta:
+                model = Instructor
+                fields = ("user", "skills", "account_number", "account_name", "bank_name")
 
-#             def create(self, validated_data):
+            def create(self, validated_data):
 
-#                 # extract user data
-#                 if "user" in validated_data:
-#                     user = validated_data.pop('user')
-#                     #create user
-#                     generated_password = generate_passwords()
-#                     user = User.objects.create_instructor(password=generated_password, **user)
+                # extract user data
+                if "user" in validated_data:
+                    user = validated_data.pop('user')
+                    #create user
+                    generated_password = generate_passwords()
+                    user = User.objects.create_instructor(password=generated_password, **user)
 
-#                     message = f"""
-#                     Your account details are
-#                     password: {generated_password}
-#                     """
-#                     user.email_user("Roothub Account Login Credentials", message, "admin@developer.com")
-#                     user.save()
+                    message = f"""
+                    Your account details are
+                    password: {generated_password}
+                    """
+                    user.email_user("Roothub Account Login Credentials", message, "admin@developer.com")
+                    user.save()
 
-#                 instructor = Instructor.objects.create(user = user, **validated_data)
-#                 instructor.save()
+                instructor = Instructor.objects.create(user = user, **validated_data)
+                instructor.save()
 
-#                 return instructor
+                return instructor
 
-#     class InstructorRetrieveSerializer(serializers.ModelSerializer):
-#         class Meta:
-#             model = Instructor
-#             fields = "__all__"
+    class InstructorRetrieveSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Instructor
+            fields = "__all__"
 
 
 class ProgramSerializer:
