@@ -23,3 +23,15 @@ class Course(BaseModelMixin):
         max_length=2, 
         choices=((str(i), i) for i in range(1, 5))
     ) #4weeks
+
+
+class CourseSession(BaseModelMixin):
+    start_date = models.DateTimeField(null=True, blank=True)
+    estimated_end_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    course = models.ForeignKey(
+        Course, 
+        related_name='sessions', 
+        on_delete=models.CASCADE
+    )
+    is_active = models.BooleanField(default=True)

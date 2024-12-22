@@ -105,16 +105,18 @@ class UserViewset(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         student = serializer.save()
 
-        #TODO: send notification to instructor of the course
-
         # add student to course
 
         prog = student.program
         course = prog.courses.all().order_by('level').first()
-        print(course,student.program.name,  student.program.courses, student.courses,"COURSE==")
 
         if(course):
             student.courses.add(course)
+
+        # TODO: move sending of email from serializer to view
+        
+        #TODO: send notification to instructor of the course
+
 
         message = f"Student registration is successful, user credentials has been sent to {
             copy_data['user']['email']}"

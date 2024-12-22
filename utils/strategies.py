@@ -31,7 +31,6 @@ class CreateStrategy(TestStrategy):
 
     def act(self):
         self.response = self.client.post(self.url, self.data, format='json')
-        print(self.response.data, self.response.status_code)
     
     def assert_(self):
         assert self.response.status_code == 201
