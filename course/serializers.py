@@ -50,6 +50,7 @@ class CourseSerializer:
                 "program",
                 "duration",  
                 "instructor", 
+                "level"
             ]
 
 

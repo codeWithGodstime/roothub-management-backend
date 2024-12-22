@@ -90,3 +90,4 @@ class Student(BaseModelMixin):
     payment_plan = models.CharField(max_length=30, choices=payment_plan)
     program = models.ForeignKey(
         Program, related_name="students", on_delete=models.RESTRICT)
+    courses = models.ManyToManyField("course.Course", related_name="students")

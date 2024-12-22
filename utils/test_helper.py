@@ -45,12 +45,18 @@ class TestHelper:
         }
 
     def course_data(self, program: models.Model, instructor: models.Model):
-        levels = ["Beginner", "Intermediate", "Advanced"]
-        level = random.choice(levels)  # Randomly select a course level
+        levels = {
+            "Beginner": 1,
+            "Basic": 2,
+            "Intermediate": 3,
+            "Advanced": 4,
+        }
+        level_name = random.choice(list(levels.keys()))  # Randomly select a course level
         return {
-            "name": f"{program.name}-{level.lower()}",
+            "name": f"{program.name}-{level_name.lower()}",
             "program": program.id,
             "instructor": instructor.id,
+            "level": levels[level_name],  # Map level name to its numeric value
             "duration": 4,  # Example duration
         }
 

@@ -91,9 +91,9 @@ class UserViewset(viewsets.ModelViewSet):
         return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
     @extend_schema(
-            operation_id="create students",
-            request=StudentSerializer.StudentCreateSerializer,
-            summary="Create a student account endpoint"
+        operation_id="create students",
+        request=StudentSerializer.StudentCreateSerializer,
+        summary="Create a student account endpoint"
     )
     @action(methods=["post"], detail=False)
     @transaction.atomic()
@@ -103,25 +103,39 @@ class UserViewset(viewsets.ModelViewSet):
         # a signal is been triggered to add user to a course session
         serializer = StudentSerializer.StudentCreateSerializer(data=copy_data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        student = serializer.save()
 
-        message =  f"Student registration is successful, user credentials has been sent to {copy_data['user']['email']}"
+        #TODO: send notification to instructor of the course
+
+        # add student to course
+
+        prog = student.program
+        course = prog.courses.all().order_by('level').first()
+        print(course,student.program.name,  student.program.courses, student.courses,"COURSE==")
+
+        if(course):
+            student.courses.add(course)
+
+        message = f"Student registration is successful, user credentials has been sent to {
+            copy_data['user']['email']}"
         return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
     @extend_schema(
-            operation_id="create instructors",
-            request=InstructorSerializer.InstructorCreateSerializer,
-            summary="Create a instructor account endpoint"
+        operation_id="create instructors",
+        request=InstructorSerializer.InstructorCreateSerializer,
+        summary="Create a instructor account endpoint"
     )
     @action(methods=['post'], detail=False)
     @transaction.atomic()
     def instructors(self, request, *args, **kwargs):
         copy_data = request.data.copy()
 
-        serializer = InstructorSerializer.InstructorCreateSerializer(data=copy_data)
+        serializer = InstructorSerializer.InstructorCreateSerializer(
+            data=copy_data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        message = f"Instructor registration is successful, user credentials has been sent to {copy_data['user']['email']}"
+        message = f"Instructor registration is successful, user credentials has been sent to {
+            copy_data['user']['email']}"
         return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
 
@@ -129,18 +143,20 @@ class UserViewset(viewsets.ModelViewSet):
 class ProgramViewset(viewsets.ModelViewSet):
     queryset = Program.objects.all()
     serializer_class = ProgramSerializer.ProgramRetrieveSerializer
-    permission_classes = [permissions.IsAuthenticated, CustomAdminOnlyPermission]
+    permission_classes = [
+        permissions.IsAuthenticated, CustomAdminOnlyPermission]
 
     @extend_schema(
-            operation_id="Create program",
-             request=ProgramSerializer.ProgramCreateSerializer,
-             summary="Create a program account endpoint"
+        operation_id="Create program",
+        request=ProgramSerializer.ProgramCreateSerializer,
+        summary="Create a program account endpoint"
     )
     @transaction.atomic()
     def create(self, request, *args, **kwargs):
 
         # program = super().create(request, *args, **kwargs)
-        serializer = ProgramSerializer.ProgramRetrieveSerializer(data=request.data)
+        serializer = ProgramSerializer.ProgramRetrieveSerializer(
+            data=request.data)
         serializer.is_valid(raise_exception=True)
         program = serializer.save()
 
@@ -151,28 +167,32 @@ class ProgramViewset(viewsets.ModelViewSet):
         # create course
         for t in range(program.duration):
             Course.objects.create(
-                name = f"{program.name}-{levels[t]}",
-                program = program,
-                duration=str(1) #every course last for atleast a month
+                name=f"{program.name}-{levels[t]}",
+                program=program,
+                duration=str(1),  # every course last for atleast a month
+                level=t
             )
 
-        response_data = ProgramSerializer.ProgramRetrieveSerializer(program).data
+        response_data = ProgramSerializer.ProgramRetrieveSerializer(
+            program).data
 
         return Response(response_data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
-            operation_id="Update Program",
-             request=ProgramSerializer.ProgramUpdateSerializer,
-             summary="Update program information by the admin"
+        operation_id="Update Program",
+        request=ProgramSerializer.ProgramUpdateSerializer,
+        summary="Update program information by the admin"
     )
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
+
 
 @extend_schema(tags=['Students'])
 class StudentViewset(viewsets.ReadOnlyModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer.StudentRetrieveSerializer
     permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
+
 
 @extend_schema(tags=['Instructors'])
 class InstructorViewset(viewsets.ReadOnlyModelViewSet):

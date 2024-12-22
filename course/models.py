@@ -12,9 +12,14 @@ class Course(BaseModelMixin):
     )
     program = models.ForeignKey(
         "authentication.Program", 
+        related_name="courses",
         on_delete=models.CASCADE
     )
     duration = models.CharField(
+        max_length=2, 
+        choices=((str(i), i) for i in range(1, 5))
+    ) #4weeks
+    level = models.CharField(
         max_length=2, 
         choices=((str(i), i) for i in range(1, 5))
     ) #4weeks
