@@ -100,3 +100,22 @@ class Student(BaseModelMixin):
         Program, related_name="students", on_delete=models.RESTRICT)
     courses = models.ManyToManyField("course.Course", through="StudentCourse", related_name="students")
 
+class StudentCourseSession(models.Model):
+    student_course = models.ForeignKey(
+        StudentCourse, 
+        on_delete=models.CASCADE,
+        related_name="sessions"
+    )
+    course_session = models.ForeignKey(
+        "course.CourseSession", 
+        on_delete=models.CASCADE,
+        related_name="student_sessions"
+    )
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['student_course', 'course_session'], 
+                name='unique_student_course_session'
+            )
+        ]

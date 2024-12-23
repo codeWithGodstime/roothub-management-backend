@@ -5,7 +5,7 @@ from utils.model_mixins import BaseModelMixin
 class Course(BaseModelMixin):
     name = models.CharField(max_length=300, unique=True)
     instructor = models.OneToOneField(
-        'authentication.User', 
+        'authentication.Instructor', 
         null=True, 
         blank=True, 
         on_delete=models.SET_NULL

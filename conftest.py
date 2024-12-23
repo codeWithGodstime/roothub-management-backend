@@ -30,3 +30,16 @@ def instructor_fixture() -> instruction_factory.InstructorFactory:
 @pytest.fixture
 def course_factory_fixture() -> course_factory.CourseFactory:
     return course_factory.CourseFactory
+
+@pytest.fixture
+def program_with_course_fixture(program_factory_fixture, course_factory_fixture):
+    def create_program_with_courses(course_count=3):
+        # Create a program
+        program = program_factory_fixture()
+
+        # Use create course without an instructor
+        courses = course_factory_fixture.create(program=program, instructor=None)
+
+        return program, courses
+
+    return create_program_with_courses

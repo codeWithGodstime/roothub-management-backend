@@ -1,3 +1,4 @@
+from typing import Literal
 from abc import abstractmethod, ABC
 from rest_framework.test import APIClient
 from django.db import models
@@ -42,13 +43,20 @@ class CreateStrategy(TestStrategy):
 
 
 class UpdateStrategy(TestStrategy):
-    def __init__(self, client: APIClient, url: str, data: dict, expected_data: list, model: models.Model, unique_field: str):
+    def __init__(self, client: APIClient, url: str, data: dict, expected_data: list, model: models.Model, unique_field: str, unique_value: str, type: Literal["full", "partial"]):
         super().__init__(client, url, data, expected_data)
         self.model = model
         self.unique_field = unique_field
+        self.unique_value = unique_value
+        self.type = type #partial or full
 
     def act(self):
-        self.response = self.client.put(self.url, self.data, format='json')  # For a full update
+        if type == "full":
+            self.response = self.client.put(self.url, self.data, format='json')  # For a full update
+        else:
+            self.response = self.client.patch(self.url, self.data, format='json')
+        
+        print(self.response.data)
 
     def assert_(self):
         # Check for successful response
@@ -64,7 +72,7 @@ class UpdateStrategy(TestStrategy):
         assert all(results)
 
         # Validate that the changes are reflected in the database
-        instance = self.model.objects.filter(id=self.unique_field).first()
+        instance = self.model.objects.filter(**{self.unique_field: self.unique_value}).first()
         assert instance is not None, "Updated instance not found in the database"
 
 

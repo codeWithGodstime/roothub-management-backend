@@ -8,5 +8,10 @@ makemigrations:
 startserver:
 	docker-compose up
 
+# Apply migrations in the backend container
 migrate:
 	docker-compose exec backend python manage.py migrate
+
+# Run tests with coverage in the backend container
+run-coverage:
+	docker-compose exec backend coverage run -m pytest -rP -v && coverage report -m

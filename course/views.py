@@ -1,16 +1,17 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
+from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema_field, extend_schema, extend_schema_view, OpenApiParameter
 
-from .serializers import CourseSerializer
-from .models import Course
+from .serializers import CourseSerializer, CourseSessionSerializer
+from .models import Course, CourseSession
 
 
-# @extend_schema(tags=['Course session'])
-# class CourseSessionViewset(viewsets.ModelViewSet):
-#     queryset = CourseSession.objects.all()
-#     serializer_class = CourseSessionSerializer.CourseSessionRetreiveSerializer
-#     permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
+@extend_schema(tags=['CourseSession'])
+class CourseSessionViewset(viewsets.ModelViewSet):
+    queryset = CourseSession.objects.all()
+    serializer_class = CourseSessionSerializer.CourseSessionRetrieveSerializer
+    permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
 
 
 @extend_schema(tags=['Course'])
@@ -25,5 +26,22 @@ class CourseViewset(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
+    @extend_schema(
+        operation_id="assign instructor to course",
+        request=CourseSerializer.AssignInstructorToCourse,
+        summary="Admin can assign instructor to a course"
+    )
+    @action(methods=['post'], detail=True)
+    def assign(self, request, *args, **kwargs):
+        course = self.get_object()
+        serializer = CourseSerializer.AssignInstructorToCourse(
+            data=request.data, 
+            context={'course': course}
+        )
+        serializer.is_valid(raise_exception=True)
+        course = serializer.save()
+
+        serialized_response = CourseSerializer.CourseRetrieveSerializer(course).data
+        return Response(serialized_response, status=status.HTTP_200_OK)
 
     
