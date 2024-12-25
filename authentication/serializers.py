@@ -6,8 +6,7 @@ from faker import Faker
 from decimal import Decimal
 
 # from .models import User, Student, Instructor
-from .models import Program, Student, Instructor
-from utils.util_functions import generate_passwords
+from .models import Program, Student, Instructor, StudentPayment
 
 User = get_user_model()
 faker = Faker()
@@ -32,16 +31,8 @@ class UserSerializer:
             return super().validate(attrs)
 
         def create(self, validated_data):
-            generated_password = generate_passwords()
             user = User.objects.create_user(
-                password=generated_password, **validated_data)
-
-            message = f"""
-            Your account details are
-            password: {generated_password}
-            """
-            user.email_user("Roothub Account Login Credentials",
-                            message, "admin@developer.com")
+                password=self.context.get("generated_password"), **validated_data)
             user.save()
             return user
 
@@ -56,7 +47,12 @@ class UserSerializer:
                 "first_name",
                 "last_name",
                 "id",
-                "role"
+                "role",
+                "next_of_kin_contact",
+                "next_of_kin_name",
+                "next_of_kin_email",
+                "next_of_kin_relationship",
+                "home_address"
             )
 
         def get_role(self, obj) -> str:
@@ -72,9 +68,22 @@ class UserSerializer:
             return None
 
 
+class StudentPaymentSerializer:
+    class StudentPaymentCreateSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = StudentPayment
+            fields = ["payment_date", "amount"]
+        
+    
+    class StudentPaymentRetrieveSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = StudentPayment
+            fields = ["id", "student", "payment_date", "amount", "created_at", "updated_at"]
+
 class StudentSerializer:
     class StudentCreateSerializer(serializers.ModelSerializer):
         user = UserSerializer.UserCreateSerializer()
+        payment = StudentPaymentSerializer.StudentPaymentCreateSerializer()
 
         class Meta:
             model = Student
@@ -83,29 +92,30 @@ class StudentSerializer:
                 "program",
                 "type",
                 "payment_plan",
+                "payment"
             )
 
         def create(self, validated_data):
+
+            # extract payment
+            payment = validated_data.pop("payment")
 
             # extract user data
             if "user" in validated_data:
                 user = validated_data.pop('user')
                 # create user
-                generated_password = generate_passwords()
                 user = User.objects.create_student(
-                    password=generated_password, **user
+                    password=self.context.get("generated_password"), **user
                 )
-        
-                message = f"""
-                Your account details are
-                password: {generated_password}
-                """
-                user.email_user("Roothub Account Login Credentials",
-                                message, "admin@developer.com")
                 user.save()
-
+            
             student = Student.objects.create(user=user, **validated_data)
             student.save()
+
+            if "payment" in validated_data:
+                payment_data = StudentPayment.objects.create(**payment)
+                payment_data.save()
+
             return student
 
     class StudentRetrieveSerializer(serializers.ModelSerializer):
@@ -211,3 +221,5 @@ class TokenObtainSerializer(SimpleJWTTokenObtainPairSerializer):
 
         data['data'] = user_data
         return data
+
+

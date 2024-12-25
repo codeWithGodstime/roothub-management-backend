@@ -1,6 +1,5 @@
 from datetime import date, timedelta
 from django.db import models
-from django.db.models import UniqueConstraint
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.mail import send_mail
 
@@ -79,14 +78,11 @@ class Instructor(BaseModelMixin):
     account_name = models.CharField(max_length=100, null=True, blank=True)
     bank_name = models.CharField(max_length=200, null=True, blank=True)
 
+class InstructorSkill(BaseModelMixin):
+    instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
+    name = models.CharField(max_length=30, unique=True)
+    is_primary = models.BooleanField(default=False)
 
-class StudentCourse(models.Model):
-    student = models.ForeignKey("Student", on_delete=models.CASCADE)
-    course = models.ForeignKey('course.Course', on_delete=models.CASCADE)
-    class Meta:
-        constraints = [
-            UniqueConstraint(fields=['student', 'course'], name='unique_student_course')
-        ]
 class Student(BaseModelMixin):
 
     type = {t: t for t in ["INTERN", "EXTERN", "TRIPTERN"]}
@@ -98,24 +94,15 @@ class Student(BaseModelMixin):
     payment_plan = models.CharField(max_length=30, choices=payment_plan)
     program = models.ForeignKey(
         Program, related_name="students", on_delete=models.RESTRICT)
-    courses = models.ManyToManyField("course.Course", through="StudentCourse", related_name="students")
+    courses = models.ManyToManyField("course.Course", through="course.StudentCourse", related_name="students")
 
-class StudentCourseSession(models.Model):
-    student_course = models.ForeignKey(
-        StudentCourse, 
-        on_delete=models.CASCADE,
-        related_name="sessions"
-    )
-    course_session = models.ForeignKey(
-        "course.CourseSession", 
-        on_delete=models.CASCADE,
-        related_name="student_sessions"
-    )
-    
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['student_course', 'course_session'], 
-                name='unique_student_course_session'
-            )
-        ]
+
+class StudentPayment(BaseModelMixin):
+
+    amount = models.DecimalField(decimal_places=2, max_digits=16)
+    student = models.ForeignKey(Student, on_delete=models.DO_NOTHING)
+    payment_date = models.DateField()
+
+
+# class StudentCourseSession(BaseModelMixin):
+#     student = 

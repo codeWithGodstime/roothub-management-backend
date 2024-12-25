@@ -1,5 +1,6 @@
 from django.db import models
 from utils.model_mixins import BaseModelMixin
+from django.db.models import UniqueConstraint
 
 
 class Course(BaseModelMixin):
@@ -35,3 +36,32 @@ class CourseSession(BaseModelMixin):
         on_delete=models.CASCADE
     )
     is_active = models.BooleanField(default=True)
+
+class StudentCourse(models.Model):
+    student = models.ForeignKey("authentication.Student", on_delete=models.CASCADE)
+    course = models.ForeignKey('course.Course', on_delete=models.CASCADE)
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['student', 'course'], name='unique_student_course')
+        ]
+
+
+class StudentCourseSession(models.Model):
+    student_course = models.ForeignKey(
+        StudentCourse, 
+        on_delete=models.CASCADE,
+        related_name="sessions"
+    )
+    course_session = models.ForeignKey(
+        "course.CourseSession", 
+        on_delete=models.CASCADE,
+        related_name="student_sessions"
+    )
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['student_course', 'course_session'], 
+                name='unique_student_course_session'
+            )
+        ]

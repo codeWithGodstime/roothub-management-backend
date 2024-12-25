@@ -8,11 +8,12 @@ from rest_framework.decorators import action
 from rest_framework_simplejwt.views import TokenObtainPairView as SimpleJWTTokenObtainPairView
 
 from drf_spectacular.utils import extend_schema_field, extend_schema, extend_schema_view, OpenApiParameter
+from utils.util_functions import generate_passwords
 
 # , , InstructorSerializer
 from .serializers import UserSerializer, TokenObtainSerializer, ProgramSerializer, StudentSerializer, InstructorSerializer
 
-from course.models import Course
+from course.models import Course, StudentCourse
 from .models import Program, Student, Instructor
 
 
@@ -81,10 +82,19 @@ class UserViewset(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         copy_data = request.data.copy()
+        generated_password = generate_passwords()
 
         serializer = UserSerializer.UserCreateSerializer(data=copy_data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        user = serializer.save()
+
+        message = f"""
+            Your account details are
+            password: {generated_password}
+            """
+        user.email_user("Roothub Account Login Credentials",
+                            message, "admin@developer.com")
+        
         message = f"User registration is successful, user credentials has been sent to {
             copy_data['email']}"
 
@@ -99,27 +109,36 @@ class UserViewset(viewsets.ModelViewSet):
     @transaction.atomic()
     def students(self, request, *args, **kwargs):
         copy_data = request.data.copy()
+        generated_password = generate_passwords()
 
         # a signal is been triggered to add user to a course session
-        serializer = StudentSerializer.StudentCreateSerializer(data=copy_data)
+        serializer = StudentSerializer.StudentCreateSerializer(
+            data=copy_data, 
+            context={"generated_password": generated_password}
+        )
         serializer.is_valid(raise_exception=True)
         student = serializer.save()
 
         # add student to course
-
         prog = student.program
         course = prog.courses.all().order_by('level').first()
 
         if(course):
-            student.courses.add(course)
+            StudentCourse.objects.create(
+                student=student,
+                course=course
+            )
 
-        # TODO: move sending of email from serializer to view
+        message = f"""
+        Your account details are
+        password: {generated_password}
+        """
+        student.user.email_user("Roothub Account Login Credentials",
+                        message, "admin@developer.com")
         
         #TODO: send notification to instructor of the course
 
-
-        message = f"Student registration is successful, user credentials has been sent to {
-            copy_data['user']['email']}"
+        message = f"Student registration is successful, user credentials has been sent to {copy_data['user']['email']}"
         return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
     @extend_schema(
