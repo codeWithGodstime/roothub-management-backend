@@ -11,12 +11,6 @@ class InstructorFactory(factory.django.DjangoModelFactory):
         model = Instructor
 
     user = factory.SubFactory(UserFactory)
-    skills = factory.LazyFunction(
-        lambda: random.sample(
-            ["Python", "JavaScript", "UI/UX", "HTML", "CSS", "React"], 
-            k=random.randint(1, 6)
-        )
-    )
     account_number = factory.Faker('numerify', text='##########')
     account_name = factory.Faker('name')
     bank_name = factory.Faker('company')

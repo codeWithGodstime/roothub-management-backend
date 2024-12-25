@@ -73,7 +73,6 @@ class Program(BaseModelMixin):
 class Instructor(BaseModelMixin):
     user = models.OneToOneField(
         User, on_delete=models.DO_NOTHING, related_name="instructor")
-    skills = models.JSONField(default=list)
     account_number = models.CharField(max_length=30, null=True, blank=True)
     account_name = models.CharField(max_length=100, null=True, blank=True)
     bank_name = models.CharField(max_length=200, null=True, blank=True)

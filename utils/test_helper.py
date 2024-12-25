@@ -18,11 +18,28 @@ class TestHelper:
             "payment_plan": faker.random_choices(elements=['FULL', "PART", "NOT PAID"])[0],
             "type": faker.random_choices(elements=["INTERN", "EXTERN", "TRIPTERN"])[0],
             "program": program_id,
+            "payment": {
+                "payment_date": faker.past_date(start_date="-2d"),
+                "amount": 600000.00
+            }
         }
 
     def instructor_data(self):
         return {
-            "user": self.user_data()
+            "user": self.user_data(),
+            "skills": [
+                {
+                    "name": 'python',
+                    "is_primary": True
+                },
+                {
+                    "name": "web development",
+                    "is_primary": False
+                },
+            ],
+            "account_number": faker.bban(),
+            "account_name": faker.name(),
+            "bank_name": faker.company(),
         }
 
     def user_data(self):
@@ -51,7 +68,8 @@ class TestHelper:
             "Intermediate": 3,
             "Advanced": 4,
         }
-        level_name = random.choice(list(levels.keys()))  # Randomly select a course level
+        # Randomly select a course level
+        level_name = random.choice(list(levels.keys()))
         return {
             "name": f"{program.name}-{level_name.lower()}",
             "program": program.id,

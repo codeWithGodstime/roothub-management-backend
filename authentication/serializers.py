@@ -140,6 +140,7 @@ class InstructorSkillSerializer(serializers.ModelSerializer):
         model = InstructorSkill
         fields = ["name", "is_primary"]
 
+
 class InstructorSerializer(serializers.ModelSerializer):
 
     class InstructorCreateSerializer(serializers.ModelSerializer):
@@ -149,13 +150,12 @@ class InstructorSerializer(serializers.ModelSerializer):
         class Meta:
             model = Instructor
             fields = ("user", "skills", "account_number",
-                      "account_name", "bank_name", "skills")
+                      "account_name", "bank_name")
 
         def create(self, validated_data):
-            
             if "skills" in validated_data:
                 skills_data = validated_data.pop("skills")
-
+                
             # extract user data
             if "user" in validated_data:
                 user = validated_data.pop('user')
@@ -179,8 +179,6 @@ class InstructorSerializer(serializers.ModelSerializer):
         class Meta:
             model = Instructor
             fields = "__all__"
-
-
 
 
 class ProgramSerializer:
