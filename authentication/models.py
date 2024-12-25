@@ -78,10 +78,12 @@ class Instructor(BaseModelMixin):
     account_name = models.CharField(max_length=100, null=True, blank=True)
     bank_name = models.CharField(max_length=200, null=True, blank=True)
 
+
 class InstructorSkill(BaseModelMixin):
     instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
     name = models.CharField(max_length=30, unique=True)
     is_primary = models.BooleanField(default=False)
+
 
 class Student(BaseModelMixin):
 
@@ -94,7 +96,8 @@ class Student(BaseModelMixin):
     payment_plan = models.CharField(max_length=30, choices=payment_plan)
     program = models.ForeignKey(
         Program, related_name="students", on_delete=models.RESTRICT)
-    courses = models.ManyToManyField("course.Course", through="course.StudentCourse", related_name="students")
+    courses = models.ManyToManyField(
+        "course.Course", through="course.StudentCourse", related_name="students")
 
 
 class StudentPayment(BaseModelMixin):
@@ -105,4 +108,4 @@ class StudentPayment(BaseModelMixin):
 
 
 # class StudentCourseSession(BaseModelMixin):
-#     student = 
+#     student =

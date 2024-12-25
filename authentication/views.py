@@ -150,11 +150,20 @@ class UserViewset(viewsets.ModelViewSet):
     @transaction.atomic()
     def instructors(self, request, *args, **kwargs):
         copy_data = request.data.copy()
+        generated_password = generate_passwords()
 
         serializer = InstructorSerializer.InstructorCreateSerializer(
             data=copy_data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        instructor = serializer.save()
+
+        message = f"""
+            Your account details are
+            password: {generated_password}
+        """
+
+        instructor.user.email_user("Roothub Account Login Credentials", message, "admin@developer.com")
+                    
         message = f"Instructor registration is successful, user credentials has been sent to {
             copy_data['user']['email']}"
         return Response({"detail": message}, status=status.HTTP_201_CREATED)

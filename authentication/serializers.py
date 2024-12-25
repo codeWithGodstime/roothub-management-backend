@@ -6,7 +6,7 @@ from faker import Faker
 from decimal import Decimal
 
 # from .models import User, Student, Instructor
-from .models import Program, Student, Instructor, StudentPayment
+from .models import Program, Student, Instructor, StudentPayment, InstructorSkill
 
 User = get_user_model()
 faker = Faker()
@@ -73,12 +73,13 @@ class StudentPaymentSerializer:
         class Meta:
             model = StudentPayment
             fields = ["payment_date", "amount"]
-        
-    
+
     class StudentPaymentRetrieveSerializer(serializers.ModelSerializer):
         class Meta:
             model = StudentPayment
-            fields = ["id", "student", "payment_date", "amount", "created_at", "updated_at"]
+            fields = ["id", "student", "payment_date",
+                      "amount", "created_at", "updated_at"]
+
 
 class StudentSerializer:
     class StudentCreateSerializer(serializers.ModelSerializer):
@@ -108,7 +109,7 @@ class StudentSerializer:
                     password=self.context.get("generated_password"), **user
                 )
                 user.save()
-            
+
             student = Student.objects.create(user=user, **validated_data)
             student.save()
 
@@ -134,40 +135,52 @@ class StudentSerializer:
             )
 
 
+class InstructorSkillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InstructorSkill
+        fields = ["name", "is_primary"]
+
 class InstructorSerializer(serializers.ModelSerializer):
 
     class InstructorCreateSerializer(serializers.ModelSerializer):
-            user = UserSerializer.UserCreateSerializer()
+        user = UserSerializer.UserCreateSerializer()
+        skills = InstructorSkillSerializer(many=True)
 
-            class Meta:
-                model = Instructor
-                fields = ("user", "skills", "account_number", "account_name", "bank_name")
+        class Meta:
+            model = Instructor
+            fields = ("user", "skills", "account_number",
+                      "account_name", "bank_name", "skills")
 
-            def create(self, validated_data):
+        def create(self, validated_data):
+            
+            if "skills" in validated_data:
+                skills_data = validated_data.pop("skills")
 
-                # extract user data
-                if "user" in validated_data:
-                    user = validated_data.pop('user')
-                    #create user
-                    generated_password = generate_passwords()
-                    user = User.objects.create_instructor(password=generated_password, **user)
+            # extract user data
+            if "user" in validated_data:
+                user = validated_data.pop('user')
+                # create user
+                user = User.objects.create_instructor(
+                    password=self.context.get("generated_password"), **user)
+                user.save()
 
-                    message = f"""
-                    Your account details are
-                    password: {generated_password}
-                    """
-                    user.email_user("Roothub Account Login Credentials", message, "admin@developer.com")
-                    user.save()
+            instructor = Instructor.objects.create(user=user, **validated_data)
+            instructor.save()
 
-                instructor = Instructor.objects.create(user = user, **validated_data)
-                instructor.save()
+            skill_instances = [
+                InstructorSkill(instructor=instructor, **skill_data)
+                for skill_data in skills_data
+            ]
+            InstructorSkill.objects.bulk_create(skill_instances)
 
-                return instructor
+            return instructor
 
     class InstructorRetrieveSerializer(serializers.ModelSerializer):
         class Meta:
             model = Instructor
             fields = "__all__"
+
+
 
 
 class ProgramSerializer:
@@ -191,7 +204,7 @@ class ProgramSerializer:
                 data["total_amount"] = float(data["total_amount"])
 
             return data
-    
+
     class ProgramUpdateSerializer(serializers.ModelSerializer):
         class Meta:
             model = Program
@@ -221,5 +234,3 @@ class TokenObtainSerializer(SimpleJWTTokenObtainPairSerializer):
 
         data['data'] = user_data
         return data
-
-
