@@ -6,7 +6,7 @@ makemigrations:
 
 # Start the Django development server
 startserver:
-	docker-compose up
+	docker-compose up --build
 
 # Apply migrations in the backend container
 migrate:

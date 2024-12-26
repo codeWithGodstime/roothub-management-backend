@@ -129,29 +129,29 @@ pytestmark = pytest.mark.django_db
 
 
 class TestAccounts:
-    # def test_forget_password_valid_email(self, api_client, user_factory_fixture):
-    #     user = user_factory_fixture()
+    def test_forget_password_valid_email(self, api_client, user_factory_fixture):
+        user = user_factory_fixture()
         
-    #     payload = {"email": user.email}
-    #     response = api_client.post(reverse('users-reset-password'), payload)
-    #     print(response.data)
-    #     assert response.status_code == 200
-    #     assert response.data["message"] == "We have sent you a link to reset your password"
+        payload = {"email": user.email}
+        response = api_client.post(reverse('users-reset-password'), payload)
+        print(response.data)
+        assert response.status_code == 200
+        assert response.data["message"] == "We have sent you a link to reset your password"
 
-    # def test_forget_password_invalid_email(self, api_client):
-    #     payload = {"email": "test@gmail.com"}
-    #     response = api_client.post(reverse('users-reset-password'), payload)
-    #     print(response.data)
+    def test_forget_password_invalid_email(self, api_client):
+        payload = {"email": "test@gmail.com"}
+        response = api_client.post(reverse('users-reset-password'), payload)
+        print(response.data)
         
-    #     assert response.status_code == 404
-    #     assert response.data["error"] == "User with credentials not found"
+        assert response.status_code == 404
+        assert response.data["error"] == "User with credentials not found"
 
-    # def test_forget_password_missing_email(self, api_client):
-    #     payload = {}
-    #     response = api_client.post(reverse('users-reset-password'), payload)
+    def test_forget_password_missing_email(self, api_client):
+        payload = {}
+        response = api_client.post(reverse('users-reset-password'), payload)
 
-    #     assert response.status_code == 400
-    #     assert "email" in response.data
+        assert response.status_code == 400
+        assert "email" in response.data
 
     def test_change_password_success(self, api_client, generate_reset_token):
 
