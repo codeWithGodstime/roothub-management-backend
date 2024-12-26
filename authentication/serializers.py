@@ -67,6 +67,9 @@ class UserSerializer:
 
             return None
 
+    class ResetPasswordRequestSerializer(serializers.Serializer):
+        email = serializers.EmailField(required=True)
+
 
 class StudentPaymentSerializer:
     class StudentPaymentCreateSerializer(serializers.ModelSerializer):

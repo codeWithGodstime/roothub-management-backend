@@ -6,6 +6,8 @@ from rest_framework.request import Request
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework_simplejwt.views import TokenObtainPairView as SimpleJWTTokenObtainPairView
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.conf import settings
 
 from drf_spectacular.utils import extend_schema_field, extend_schema, extend_schema_view, OpenApiParameter
 from utils.util_functions import generate_passwords
@@ -167,6 +169,29 @@ class UserViewset(viewsets.ModelViewSet):
         message = f"Instructor registration is successful, user credentials has been sent to {
             copy_data['user']['email']}"
         return Response({"detail": message}, status=status.HTTP_201_CREATED)
+
+    @action(methods=["post"], detail=False, permission_classes=[permissions.AllowAny])
+    def reset_password(self, request, *args, **kwargs):
+        serializer = UserSerializer.ResetPasswordRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = request.data["email"]
+        user = User.objects.filter(email__iexact=email).first()
+
+        if user:
+            token_generator = PasswordResetTokenGenerator()
+            token = token_generator.make_token(user)
+
+            reset_url = f"{settings.PASSWORD_RESET_BASE_URL}/{token}"
+            subject = "Password Reset Request"
+            message = f"Hi {user.first_name},\n\nPlease click the link below to reset your password:\n{reset_url}\n\nIf you did not request this, please ignore this email."
+            email_from = settings.DEFAULT_FROM_EMAIL
+
+            user.email_user(subject, message, email_from)
+
+            return Response({'message': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "User with credentials not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 @extend_schema(tags=['Program'])

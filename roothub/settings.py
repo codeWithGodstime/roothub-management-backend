@@ -154,7 +154,9 @@ else:
     EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
     EMAIL_HOST_USER = config("EMAIL_HOST_USER")    
 
-DEFAULT_FROM_EMAIL = 'admin@developer.com'
+DEFAULT_FROM_EMAIL = "noreply@roothub.com"
+PASSWORD_RESET_BASE_URL = "https://yourfrontend.com/reset-password"
+
 
 if not DEBUG:
     SECURE_SSL_REDIRECT=True
