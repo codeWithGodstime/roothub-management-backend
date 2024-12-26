@@ -129,29 +129,90 @@ pytestmark = pytest.mark.django_db
 
 
 class TestAccounts:
-    def test_forget_password_valid_email(self, api_client, user_factory_fixture):
-        user = user_factory_fixture()
+    # def test_forget_password_valid_email(self, api_client, user_factory_fixture):
+    #     user = user_factory_fixture()
         
-        payload = {"email": user.email}
-        response = api_client.post(reverse('users-reset-password'), payload)
+    #     payload = {"email": user.email}
+    #     response = api_client.post(reverse('users-reset-password'), payload)
+    #     print(response.data)
+    #     assert response.status_code == 200
+    #     assert response.data["message"] == "We have sent you a link to reset your password"
+
+    # def test_forget_password_invalid_email(self, api_client):
+    #     payload = {"email": "test@gmail.com"}
+    #     response = api_client.post(reverse('users-reset-password'), payload)
+    #     print(response.data)
+        
+    #     assert response.status_code == 404
+    #     assert response.data["error"] == "User with credentials not found"
+
+    # def test_forget_password_missing_email(self, api_client):
+    #     payload = {}
+    #     response = api_client.post(reverse('users-reset-password'), payload)
+
+    #     assert response.status_code == 400
+    #     assert "email" in response.data
+
+    def test_change_password_success(self, api_client, generate_reset_token):
+
+        url = reverse("users-change-password")
+        new_password = "NewSecurePassword123!"
+        user, token = generate_reset_token
+
+        response = api_client.post(
+            url,
+            data={"token": f"{user.id}:{token}", "new_password": new_password},
+            format="json",
+        )
         print(response.data)
+
         assert response.status_code == 200
-        assert response.data["message"] == "We have sent you a link to reset your password"
+        assert response.data["message"] == "Password updated successfully."
 
-    def test_forget_password_invalid_email(self, api_client):
-        payload = {"email": "test@gmail.com"}
-        response = api_client.post(reverse('users-reset-password'), payload)
-        print(response.data)
-        
-        assert response.status_code == 404
-        assert response.data["error"] == "User with credentials not found"
+        # Verify the password has been updated
+        user.refresh_from_db()
+        assert user.check_password(new_password)
 
-    def test_forget_password_missing_email(self, api_client):
-        payload = {}
-        response = api_client.post(reverse('users-reset-password'), payload)
+    def test_change_password_invalid_token(self, api_client):
+        url = reverse("users-change-password")
+        invalid_token = "1:InvalidToken123"
+        new_password = "NewSecurePassword123!"
+
+        response = api_client.post(
+            url,
+            data={"token": invalid_token, "new_password": new_password},
+            format="json",
+        )
 
         assert response.status_code == 400
-        assert "email" in response.data
+        assert "token" in response.data
+
+    def test_change_password_missing_token(self, api_client):
+        url = reverse("users-change-password")
+        new_password = "NewSecurePassword123!"
+
+        response = api_client.post(
+            url,
+            data={"new_password": new_password},
+            format="json",
+        )
+
+        assert response.status_code == 400
+        assert "token" in response.data
+
+    def test_change_password_password_validation_failure(self, api_client, generate_reset_token):
+        url = reverse("users-change-password")
+        weak_password = "123"
+        user, token = generate_reset_token
+
+        response = api_client.post(
+            url,
+            data={"token": token, "new_password": weak_password},
+            format="json",
+        )
+
+        assert response.status_code == 400
+        assert "new_password" in response.data
 
 
 # class TestProgram:

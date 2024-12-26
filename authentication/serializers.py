@@ -2,10 +2,12 @@ from typing import Dict, Any
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer as SimpleJWTTokenObtainPairSerializer
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ObjectDoesNotExist
 from faker import Faker
 from decimal import Decimal
 
-# from .models import User, Student, Instructor
 from .models import Program, Student, Instructor, StudentPayment, InstructorSkill
 
 User = get_user_model()
@@ -69,6 +71,43 @@ class UserSerializer:
 
     class ResetPasswordRequestSerializer(serializers.Serializer):
         email = serializers.EmailField(required=True)
+
+    class ChangePasswordSerializer(serializers.Serializer):
+        token = serializers.CharField(required=True)
+        new_password = serializers.CharField(write_only=True, required=True)
+
+        def validate_new_password(self, value):
+            from django.contrib.auth.password_validation import validate_password
+            validate_password(value)
+            return value
+
+        def validate(self, data):
+            token = data.get("token")
+            new_password = data.get("new_password")
+
+            # Decode user ID from the token
+            try:
+                user_id, token = token.split(":", 1)
+                
+                user = User.objects.get(id=user_id)
+            except (ValueError, User.DoesNotExist):
+                raise serializers.ValidationError({"token": "Invalid token."})
+
+            # Validate the token
+            token_generator = PasswordResetTokenGenerator()
+            if not token_generator.check_token(user, token):
+                raise serializers.ValidationError(
+                    {"token": "Invalid or expired token."})
+
+            self.user = user
+            return data
+
+        def save(self):
+            """
+            Updates the user's password.
+            """
+            self.user.set_password(self.validated_data["new_password"])
+            self.user.save()
 
 
 class StudentPaymentSerializer:
@@ -158,7 +197,7 @@ class InstructorSerializer(serializers.ModelSerializer):
         def create(self, validated_data):
             if "skills" in validated_data:
                 skills_data = validated_data.pop("skills")
-                
+
             # extract user data
             if "user" in validated_data:
                 user = validated_data.pop('user')

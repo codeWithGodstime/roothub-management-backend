@@ -95,8 +95,8 @@ class UserViewset(viewsets.ModelViewSet):
             password: {generated_password}
             """
         user.email_user("Roothub Account Login Credentials",
-                            message, "admin@developer.com")
-        
+                        message, "admin@developer.com")
+
         message = f"User registration is successful, user credentials has been sent to {
             copy_data['email']}"
 
@@ -115,7 +115,7 @@ class UserViewset(viewsets.ModelViewSet):
 
         # a signal is been triggered to add user to a course session
         serializer = StudentSerializer.StudentCreateSerializer(
-            data=copy_data, 
+            data=copy_data,
             context={"generated_password": generated_password}
         )
         serializer.is_valid(raise_exception=True)
@@ -125,7 +125,7 @@ class UserViewset(viewsets.ModelViewSet):
         prog = student.program
         course = prog.courses.all().order_by('level').first()
 
-        if(course):
+        if (course):
             StudentCourse.objects.create(
                 student=student,
                 course=course
@@ -136,11 +136,12 @@ class UserViewset(viewsets.ModelViewSet):
         password: {generated_password}
         """
         student.user.email_user("Roothub Account Login Credentials",
-                        message, "admin@developer.com")
-        
-        #TODO: send notification to instructor of the course
+                                message, "admin@developer.com")
 
-        message = f"Student registration is successful, user credentials has been sent to {copy_data['user']['email']}"
+        # TODO: send notification to instructor of the course
+
+        message = f"Student registration is successful, user credentials has been sent to {
+            copy_data['user']['email']}"
         return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
     @extend_schema(
@@ -164,15 +165,17 @@ class UserViewset(viewsets.ModelViewSet):
             password: {generated_password}
         """
 
-        instructor.user.email_user("Roothub Account Login Credentials", message, "admin@developer.com")
-                    
+        instructor.user.email_user(
+            "Roothub Account Login Credentials", message, "admin@developer.com")
+
         message = f"Instructor registration is successful, user credentials has been sent to {
             copy_data['user']['email']}"
         return Response({"detail": message}, status=status.HTTP_201_CREATED)
 
     @action(methods=["post"], detail=False, permission_classes=[permissions.AllowAny])
     def reset_password(self, request, *args, **kwargs):
-        serializer = UserSerializer.ResetPasswordRequestSerializer(data=request.data)
+        serializer = UserSerializer.ResetPasswordRequestSerializer(
+            data=request.data)
         serializer.is_valid(raise_exception=True)
 
         email = request.data["email"]
@@ -181,8 +184,9 @@ class UserViewset(viewsets.ModelViewSet):
         if user:
             token_generator = PasswordResetTokenGenerator()
             token = token_generator.make_token(user)
+            print(token)
 
-            reset_url = f"{settings.PASSWORD_RESET_BASE_URL}/{token}"
+            reset_url = f"{settings.PASSWORD_RESET_BASE_URL}/{user.id}:{token}"
             subject = "Password Reset Request"
             message = f"Hi {user.first_name},\n\nPlease click the link below to reset your password:\n{reset_url}\n\nIf you did not request this, please ignore this email."
             email_from = settings.DEFAULT_FROM_EMAIL
@@ -192,6 +196,15 @@ class UserViewset(viewsets.ModelViewSet):
             return Response({'message': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
         else:
             return Response({"error": "User with credentials not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=["post"], detail=False, permission_classes=[permissions.AllowAny])
+    def change_password(self, request, *args, **kwargs):
+
+        serializer = UserSerializer.ChangePasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Password updated successfully."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema(tags=['Program'])

@@ -48,3 +48,14 @@ def course_session_fixture() -> coursesession_factory.CourseSessionFactory:
 @pytest.fixture
 def course_with_instructor_fixture() -> course_factory.CourseFactory:
     return course_factory.CourseFactory
+
+@pytest.fixture
+def generate_reset_token(user_factory_fixture) -> tuple:
+    from django.contrib.auth.tokens import PasswordResetTokenGenerator
+    """
+    Fixture to generate a password reset token for a user.
+    """
+    user = user_factory_fixture()
+    token_generator = PasswordResetTokenGenerator()
+    token = token_generator.make_token(user)
+    return user, token
