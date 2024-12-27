@@ -3,6 +3,7 @@ import pytest
 
 from authentication.tests.factories import user_factory, program_factory, student_factory, instruction_factory
 from course.tests.factories import course_factory, coursesession_factory
+from announcement.tests.factories import announcement_factory
 
 
 from rest_framework.test import APIClient
@@ -48,6 +49,10 @@ def course_session_fixture() -> coursesession_factory.CourseSessionFactory:
 @pytest.fixture
 def course_with_instructor_fixture() -> course_factory.CourseFactory:
     return course_factory.CourseFactory
+
+@pytest.fixture
+def announcement_factory_fixture() -> announcement_factory.AnnouncementFactory:
+    return announcement_factory.AnnouncementFactory
 
 @pytest.fixture
 def generate_reset_token(user_factory_fixture) -> tuple:

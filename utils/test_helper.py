@@ -78,7 +78,16 @@ class TestHelper:
             "duration": 4,  # Example duration
         }
 
-    def generate_test_data(self, type: Literal["user", "instructor", "student", 'program', "course"], *args):
+    def announcement_data(self):
+        return {
+            "title": faker.sentence(nb_words=10),
+            "message": faker.paragraph(),
+            "schedule_date": faker.future_date(),
+            # "schedule_time": faker.future_datetime(),
+            "receiver_group":  faker.random_choices(elements=["ALL", "TRAINER", "TRAINEE"])[0]
+        }
+
+    def generate_test_data(self, type: Literal["user", "instructor", "student", 'program', "course", "announcement"], *args):
 
         if type == 'student' and args:
 
@@ -93,7 +102,8 @@ class TestHelper:
         data_dict = {
             "user": self.user_data(),
             "instructor": self.instructor_data(),
-            "program": self.program_data()
+            "program": self.program_data(),
+            "announcement": self.announcement_data()
         }
 
         return data_dict[type]
@@ -116,4 +126,5 @@ def compare_dict_data(received: dict, expected: list):
             results.append(True)
         else:
             results.append(False)
+
     return all(results)

@@ -3,19 +3,18 @@ from pathlib import Path
 from datetime import timedelta
 
 from decouple import config
-import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY", default="secret_key123")
 
-# DEBUG = config("DEBUG", cast=bool, default=False)
-DEBUG=True
+DEBUG = config("DEBUG", cast=bool, default=True) #TODO change this later
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default='localhost').split(",")
 
 INSTALLED_APPS = [
-    "whitenoise.runserver_nostatic", # disable Django’s static file handling and allow WhiteNoise to take over
+    # disable Django"s static file handling and allow WhiteNoise to take over
+    "whitenoise.runserver_nostatic",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -32,7 +31,8 @@ INSTALLED_APPS = [
 
     # my apps
     "authentication",
-    "course"
+    "course",
+    "announcement"
 ]
 
 REST_FRAMEWORK = {
@@ -61,7 +61,7 @@ SPECTACULAR_SETTINGS = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    "whitenoise.middleware.WhiteNoiseMiddleware", #new
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # new
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -71,7 +71,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "localhost:5173",
+    "http://localhost:5173",
     "http://localhost:8000",
 ]
 
@@ -95,22 +95,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'roothub.wsgi.application'
 
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+
+# https://docs.djangoproject.com/en/dev/ref/settings/#databases
+# if you're not using docker
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
+# For Docker/PostgreSQL usage uncomment this and comment the DATABASES config above
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "postgres",
+        "USER": "postgres",
+        "PASSWORD": "postgres",
+        "HOST": "db",  # set in docker-compose.yml
+        "PORT": 5432,  # default postgres port
     }
-else:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=config("DATABASE_URL", default="sqlite:///db.sqlite3"),
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
-    DATABASES['default']['NAME'] = 'postgres'
+}
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -153,20 +158,30 @@ if DEBUG:
     EMAIL_HOST_USER = ''
     EMAIL_HOST_PASSWORD = ''
 
-else:  
+else:
     EMAIL_BACKEND = config("EMAIL_BACKEND")
-    EMAIL_HOST=config("EMAIL_HOST")
-    EMAIL_PORT=config("EMAIL_PORT")
+    EMAIL_HOST = config("EMAIL_HOST")
+    EMAIL_PORT = config("EMAIL_PORT")
     EMAIL_USE_TLS = config("EMAIL_USE_TLS")
     EMAIL_USE_SSL = config("EMAIL_USE_SSL")
     EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
-    EMAIL_HOST_USER = config("EMAIL_HOST_USER")    
+    EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 
 DEFAULT_FROM_EMAIL = "noreply@roothub.com"
 PASSWORD_RESET_BASE_URL = "https://yourfrontend.com/reset-password"
 
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_BACKEND", "redis://redis:6379/0")
+
+# from celery.schedules import crontab
+# CELERY_BEAT_SCHEDULE = {
+#     "sample_task": {
+#         "task": "core.tasks.sample_task",
+#         "schedule": crontab(minute="*/1"),
+#     },
+# }
 
 if not DEBUG:
-    SECURE_SSL_REDIRECT=True
-    SESSION_COOKIE_SECURE=True
-    CSRF_COOKIE_SECURE=True
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

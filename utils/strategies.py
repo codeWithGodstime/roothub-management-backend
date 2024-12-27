@@ -118,6 +118,39 @@ class ListStrategy(TestStrategy):
             assert expected_item in response_data, f"Missing item: {expected_item}"
 
 
+class NotPermittedStrategy(TestStrategy):
+
+    def __init__(self, client: APIClient, url: str, data: dict, expected_status_code: int):
+        """
+        Initializes the NotPermittedStrategy.
+
+        Args:
+            client (APIClient): The test client instance.
+            url (str): The endpoint to test.
+            data (dict): The data to send with the request.
+            expected_status_code (int): The HTTP status code expected when the request is not permitted.
+        """
+        super().__init__(client, url, data, expected_data=None)
+        self.expected_status_code = expected_status_code
+
+    def act(self):
+        """
+        Executes the action by sending a request to the specified URL with the provided data.
+        """
+        self.response = self.client.post(self.url, self.data, format='json')
+        print(self.response.data, self.response.status_code)
+
+    def assert_(self):
+        """
+        Verifies that the response status code matches the expected status code and no data changes were made.
+        """
+        assert self.response.status_code == self.expected_status_code, (
+            f"Expected status code {self.expected_status_code}, got {self.response.status_code}"
+        )
+
+        assert "detail" in self.response.data, "Response does not contain an error detail"
+
+
 class TestStrategyRunner:
     """
     A class responsible for executing a given test strategy.
