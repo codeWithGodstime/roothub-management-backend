@@ -35,7 +35,6 @@ class AnnouncementViewset(viewsets.ModelViewSet):
         # Check if schedule is provided; if not, send immediately
         if not announcement.schedule_date or not announcement.schedule_time:
             send_announcement_email(announcement.id)
-            announcement.sent = True
             announcement.save()
         
         headers = self.get_success_headers(serializer.data)

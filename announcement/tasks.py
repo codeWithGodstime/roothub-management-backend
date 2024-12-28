@@ -26,16 +26,17 @@ def send_announcement_email(announcement_id):
             users = users.filter(is_student=True).values("email")
 
         receipient_list = [user["email"] for user in users]
-        print(receipient_list, "===")
+        print("receipient_list=", receipient_list)
         if receipient_list:
-            data = (
+            data = [
                 (
                     announcement.title,
                     announcement.message,
                     "admin@roothub.com",
-                    receipient_list,
-                ),
-            )
+                    [user_email],
+                )
+                for user_email in receipient_list
+            ]
 
             send_mass_mail(data, fail_silently=False)
             announcement.save()

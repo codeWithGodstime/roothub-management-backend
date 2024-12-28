@@ -33,12 +33,12 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModelMixin):
     is_active = models.BooleanField(default=False)
 
     next_of_kin_contact = models.CharField(
-        max_length=20, blank=False, null=False)
+        max_length=40, blank=False, null=False)
     next_of_kin_email = models.EmailField(blank=False, null=False)
     next_of_kin_name = models.CharField(
         max_length=200, blank=False, null=False)
     next_of_kin_relationship = models.CharField(
-        max_length=20, choices=RELATIONSHIPS, blank=False, null=False
+        max_length=40, choices=RELATIONSHIPS, blank=False, null=False
     )
 
     USERNAME_FIELD = "email"
@@ -73,14 +73,14 @@ class Program(BaseModelMixin):
 class Instructor(BaseModelMixin):
     user = models.OneToOneField(
         User, on_delete=models.DO_NOTHING, related_name="instructor")
-    account_number = models.CharField(max_length=30, null=True, blank=True)
+    account_number = models.CharField(max_length=50, null=True, blank=True)
     account_name = models.CharField(max_length=100, null=True, blank=True)
     bank_name = models.CharField(max_length=200, null=True, blank=True)
 
 
 class InstructorSkill(BaseModelMixin):
     instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
-    name = models.CharField(max_length=30, unique=True)
+    name = models.CharField(max_length=50, unique=True)
     is_primary = models.BooleanField(default=False)
 
 
@@ -92,7 +92,7 @@ class Student(BaseModelMixin):
     user = models.OneToOneField(
         User, related_name="student", on_delete=models.DO_NOTHING)
     type = models.CharField(max_length=300, choices=type)
-    payment_plan = models.CharField(max_length=30, choices=payment_plan)
+    payment_plan = models.CharField(max_length=40, choices=payment_plan)
     program = models.ForeignKey(
         Program, related_name="students", on_delete=models.RESTRICT)
     courses = models.ManyToManyField(

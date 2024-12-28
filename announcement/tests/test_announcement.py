@@ -1,6 +1,7 @@
 import pytest
 
 from django.urls import reverse
+from django.core import mail
 from announcement.models import Announcement
 
 from utils.strategies import CreateStrategy, UpdateStrategy, TestStrategyRunner, NotPermittedStrategy
@@ -77,7 +78,7 @@ class TestAnnouncement:
             )
         )
 
-    def test_send_announcement_email_all_user(self, api_client, admin_user, user_factory_fixture):
+    def test_send_announcement_email(self, api_client, admin_user, user_factory_fixture, set_email_backend):
         users = user_factory_fixture.create_batch(10)
         api_client.force_authenticate(user=admin_user)
 
@@ -97,4 +98,15 @@ class TestAnnouncement:
                 unique
             )
         )
+
+        # Verify emails
+        assert len(mail.outbox) == 10, f"Expected 10 emails to be sent, but found {len(mail.outbox)}"
+        recipients = [email.to for email in mail.outbox]
+        recipient_emails = [user.email for user in users]
+
+        # Flatten recipients list (in case of multiple recipients in one email)
+        flat_recipients = [email for sublist in recipients for email in sublist]
+
+        assert set(flat_recipients) == set(recipient_emails), "Not all users received the email"
+
 

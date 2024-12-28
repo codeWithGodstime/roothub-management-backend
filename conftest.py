@@ -64,3 +64,7 @@ def generate_reset_token(user_factory_fixture) -> tuple:
     token_generator = PasswordResetTokenGenerator()
     token = token_generator.make_token(user)
     return user, token
+
+@pytest.fixture(autouse=True)
+def set_email_backend(settings):
+    settings.EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
