@@ -1,3 +1,4 @@
+import logging
 from rest_framework import permissions
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -18,6 +19,7 @@ from .serializers import UserSerializer, TokenObtainSerializer, ProgramSerialize
 from course.models import Course, StudentCourse
 from .models import Program, Student, Instructor
 
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -83,24 +85,35 @@ class UserViewset(viewsets.ModelViewSet):
         return self.queryset.filter(id=self.request.user.id)
 
     def create(self, request, *args, **kwargs):
+        logger.info(f"User registration attempt with data: {request.data}")
+
         copy_data = request.data.copy()
         generated_password = generate_passwords()
+        logger.debug(f"Generated password for new user: {generated_password}")
 
         serializer = UserSerializer.UserCreateSerializer(data=copy_data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        if serializer.is_valid(raise_exception=True):
+            logger.info(f"User data validated successfully.")
+            user = serializer.save()
+            logger.info(f"User created successfully with ID: {user.id}")
 
-        message = f"""
-            Your account details are
-            password: {generated_password}
+            message = f"""
+                Your account details are
+                password: {generated_password}
             """
-        user.email_user("Roothub Account Login Credentials",
-                        message, "admin@developer.com")
+            logger.info(f"Sending email to user: {user.email}")
+            user.email_user("Roothub Account Login Credentials",
+                            message, "admin@developer.com")
+            logger.info(f"Email sent successfully to: {user.email}")
 
-        message = f"User registration is successful, user credentials has been sent to {
-            copy_data['email']}"
-
-        return Response({"detail": message}, status=status.HTTP_201_CREATED)
+            message = f"User registration is successful, user credentials have been sent to {
+                copy_data['email']}"
+            logger.info(message)
+            return Response({"detail": message}, status=status.HTTP_201_CREATED)
+        else:
+            logger.error(f"User registration failed due to invalid data: {
+                         serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
         operation_id="create students",
@@ -110,39 +123,55 @@ class UserViewset(viewsets.ModelViewSet):
     @action(methods=["post"], detail=False)
     @transaction.atomic()
     def students(self, request, *args, **kwargs):
+        logger.info(f"Student registration attempt with data: {request.data}")
+
         copy_data = request.data.copy()
         generated_password = generate_passwords()
+        logger.debug(f"Generated password for new student: {
+                     generated_password}")
 
-        # a signal is been triggered to add user to a course session
         serializer = StudentSerializer.StudentCreateSerializer(
             data=copy_data,
             context={"generated_password": generated_password}
         )
-        serializer.is_valid(raise_exception=True)
-        student = serializer.save()
+        if serializer.is_valid(raise_exception=True):
+            logger.info(f"Student data validated successfully.")
+            student = serializer.save()
+            logger.info(f"Student created successfully with ID: {student.id}")
 
-        # add student to course
-        prog = student.program
-        course = prog.courses.all().order_by('level').first()
+            prog = student.program
+            course = prog.courses.all().order_by('level').first()
+            if course:
+                logger.info(f"Assigning student {
+                            student.id} to course {course.id}")
+                StudentCourse.objects.create(
+                    student=student,
+                    course=course
+                )
+                logger.info(
+                    f"Student {student.id} added to course {course.id}")
 
-        if (course):
-            StudentCourse.objects.create(
-                student=student,
-                course=course
-            )
+            message = f"""
+                Your account details are
+                password: {generated_password}
+            """
+            logger.info(f"Sending email to student: {student.user.email}")
+            student.user.email_user(
+                "Roothub Account Login Credentials", message, "admin@developer.com")
+            logger.info(f"Email sent successfully to: {student.user.email}")
 
-        message = f"""
-        Your account details are
-        password: {generated_password}
-        """
-        student.user.email_user("Roothub Account Login Credentials",
-                                message, "admin@developer.com")
+            # TODO: Send notification to instructor of the course
+            logger.info(f"Notification to instructor about student {
+                        student.id} needs to be sent.")
 
-        # TODO: send notification to instructor of the course
-
-        message = f"Student registration is successful, user credentials has been sent to {
-            copy_data['user']['email']}"
-        return Response({"detail": message}, status=status.HTTP_201_CREATED)
+            message = f"Student registration is successful, user credentials have been sent to {
+                copy_data['user']['email']}"
+            logger.info(message)
+            return Response({"detail": message}, status=status.HTTP_201_CREATED)
+        else:
+            logger.error(f"Student registration failed due to invalid data: {
+                         serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
         operation_id="create instructors",
@@ -152,59 +181,80 @@ class UserViewset(viewsets.ModelViewSet):
     @action(methods=['post'], detail=False)
     @transaction.atomic()
     def instructors(self, request, *args, **kwargs):
+        logger.info(f"Instructor registration attempt with data: {request.data}")
+
         copy_data = request.data.copy()
         generated_password = generate_passwords()
+        logger.debug(f"Generated password for new instructor: {generated_password}")
 
-        serializer = InstructorSerializer.InstructorCreateSerializer(
-            data=copy_data)
-        serializer.is_valid(raise_exception=True)
-        instructor = serializer.save()
+        serializer = InstructorSerializer.InstructorCreateSerializer(data=copy_data)
+        if serializer.is_valid(raise_exception=True):
+            logger.info(f"Instructor data validated successfully.")
+            instructor = serializer.save()
+            logger.info(f"Instructor created successfully with ID: {instructor.id}")
 
-        message = f"""
-            Your account details are
-            password: {generated_password}
-        """
+            message = f"""
+                Your account details are
+                password: {generated_password}
+            """
+            logger.info(f"Sending email to instructor: {instructor.user.email}")
+            instructor.user.email_user("Roothub Account Login Credentials", message, "admin@developer.com")
+            logger.info(f"Email sent successfully to: {instructor.user.email}")
 
-        instructor.user.email_user(
-            "Roothub Account Login Credentials", message, "admin@developer.com")
-
-        message = f"Instructor registration is successful, user credentials has been sent to {
-            copy_data['user']['email']}"
-        return Response({"detail": message}, status=status.HTTP_201_CREATED)
+            message = f"Instructor registration is successful, user credentials have been sent to {copy_data['user']['email']}"
+            logger.info(message)
+            return Response({"detail": message}, status=status.HTTP_201_CREATED)
+        else:
+            logger.error(f"Instructor registration failed due to invalid data: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=["post"], detail=False, permission_classes=[permissions.AllowAny])
     def reset_password(self, request, *args, **kwargs):
-        serializer = UserSerializer.ResetPasswordRequestSerializer(
-            data=request.data)
-        serializer.is_valid(raise_exception=True)
+        logger.info(f"Password reset request with data: {request.data}")
 
-        email = request.data["email"]
-        user = User.objects.filter(email__iexact=email).first()
+        serializer = UserSerializer.ResetPasswordRequestSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            email = request.data["email"]
+            user = User.objects.filter(email__iexact=email).first()
 
-        if user:
-            token_generator = PasswordResetTokenGenerator()
-            token = token_generator.make_token(user)
-            print(token)
+            if user:
+                logger.info(f"User found for email: {email}, initiating password reset.")
+                token_generator = PasswordResetTokenGenerator()
+                token = token_generator.make_token(user)
+                logger.debug(f"Generated token: {token}")
 
-            reset_url = f"{settings.PASSWORD_RESET_BASE_URL}/{user.id}:{token}"
-            subject = "Password Reset Request"
-            message = f"Hi {user.first_name},\n\nPlease click the link below to reset your password:\n{reset_url}\n\nIf you did not request this, please ignore this email."
-            email_from = settings.DEFAULT_FROM_EMAIL
+                reset_url = f"{settings.PASSWORD_RESET_BASE_URL}/{user.id}:{token}"
+                logger.info(f"Password reset URL: {reset_url}")
 
-            user.email_user(subject, message, email_from)
+                subject = "Password Reset Request"
+                message = f"Hi {user.first_name},\n\nPlease click the link below to reset your \npassword:{reset_url}\n\nIf you did not request this, please ignore this email."
+                email_from = settings.DEFAULT_FROM_EMAIL
 
-            return Response({'message': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
+                logger.info(f"Sending password reset email to: {email}")
+                user.email_user(subject, message, email_from)
+                logger.info(f"Password reset email sent successfully to: {email}")
+
+                return Response({'message': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
+            else:
+                logger.warning(f"User with email {email} not found.")
+                return Response({"error": "User with email not found"}, status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response({"error": "User with credentials not found"}, status=status.HTTP_404_NOT_FOUND)
+            logger.error(f"Password reset request failed due to invalid data: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=["post"], detail=False, permission_classes=[permissions.AllowAny])
     def change_password(self, request, *args, **kwargs):
+        logger.info(f"Password change request with data: {request.data}")
 
         serializer = UserSerializer.ChangePasswordSerializer(data=request.data)
         if serializer.is_valid():
+            logger.info("Password change request validated successfully.")
             serializer.save()
+            logger.info(f"Password changed successfully for user: {self.request.user.id}")
             return Response({"message": "Password updated successfully."}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.error(f"Password change request failed due to invalid data: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema(tags=['Program'])
@@ -221,28 +271,33 @@ class ProgramViewset(viewsets.ModelViewSet):
     )
     @transaction.atomic()
     def create(self, request, *args, **kwargs):
+        logger.info(f"Program creation request with data: {request.data}")
 
-        # program = super().create(request, *args, **kwargs)
-        serializer = ProgramSerializer.ProgramRetrieveSerializer(
-            data=request.data)
+        serializer = ProgramSerializer.ProgramRetrieveSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         program = serializer.save()
+
+        logger.info(f"Program '{program.name}' created successfully with ID {program.id}.")
 
         levels = ["basic", "intermediate", "advanced"]
         if program.duration == 4:
             levels = ["beginner", "basic", "intermediate", "advanced"]
 
-        # create course
-        for t in range(program.duration):
+        logger.info(f"Creating courses for program '{program.name}' with levels: {levels}")
+
+        # Create courses
+        for t, level in enumerate(levels):
+            course_name = f"{program.name}-{level}"
             Course.objects.create(
-                name=f"{program.name}-{levels[t]}",
+                name=course_name,
                 program=program,
-                duration=str(1),  # every course last for atleast a month
+                duration=str(1),  # every course lasts for at least a month
                 level=t
             )
+            logger.info(f"Course '{course_name}' created successfully.")
 
-        response_data = ProgramSerializer.ProgramRetrieveSerializer(
-            program).data
+        response_data = ProgramSerializer.ProgramRetrieveSerializer(program).data
+        logger.info(f"Program creation response: {response_data}")
 
         return Response(response_data, status=status.HTTP_201_CREATED)
 
