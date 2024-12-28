@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY", default="secret_key123")
 
-DEBUG = config("DEBUG", cast=bool, default=True) #TODO change this later
+DEBUG = config("DEBUG", cast=bool, default=True)  # TODO change this later
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default='localhost').split(",")
 
@@ -172,6 +172,35 @@ PASSWORD_RESET_BASE_URL = "https://yourfrontend.com/reset-password"
 
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_BACKEND", "redis://redis:6379/0")
+
+
+LOGGING = {
+    "version": 1,  # the dictConfig format version
+    "disable_existing_loggers": False,  # retain the default loggers
+    "handlers": {
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "general.log",
+        },
+    },
+    "loggers": {
+        "": {
+            "level": "DEBUG",
+            "handlers": ["file"],
+        },
+    },
+    "formatters": {
+        "verbose": {
+            "format": "{name} {levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+
+}
 
 # from celery.schedules import crontab
 # CELERY_BEAT_SCHEDULE = {
