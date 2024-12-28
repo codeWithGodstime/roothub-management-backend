@@ -77,5 +77,24 @@ class TestAnnouncement:
             )
         )
 
+    def test_send_announcement_email_all_user(self, api_client, admin_user, user_factory_fixture):
+        users = user_factory_fixture.create_batch(10)
+        api_client.force_authenticate(user=admin_user)
 
+        request_data = TestHelper().generate_test_data("announcement")
+        unique = request_data['title']
+
+        api_client.force_authenticate(user=admin_user)
+
+        TestStrategyRunner.execute(
+            CreateStrategy(
+                api_client,
+                reverse("announcements-list"),
+                request_data,
+                ["id", "title", "message", "schedule_date", "schedule_time", "receiver_group", "created_at", "updated_at"],
+                Announcement,
+                "title",
+                unique
+            )
+        )
 
