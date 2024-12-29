@@ -7,6 +7,7 @@ from authentication.models import Program
 class ProgramFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Program
+        django_get_or_create = ('name',)  # Avoid unique constraint errors on the 'name' field
 
     name = factory.Iterator(["web development", 'python', 'data analysis', 'graphics design'])
     duration = factory.Faker(

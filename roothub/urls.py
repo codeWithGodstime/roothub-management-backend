@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from data.views import GenerateData
 
 
 urlpatterns = [
@@ -15,6 +16,7 @@ urlpatterns = [
     path('v1/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('v1/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('v1/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path("generate_data/", GenerateData.as_view())
 ] 
 
 if settings.DEBUG:

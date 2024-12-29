@@ -32,7 +32,8 @@ INSTALLED_APPS = [
     # my apps
     "authentication",
     "course",
-    "announcement"
+    "announcement",
+    "data"
 ]
 
 REST_FRAMEWORK = {
