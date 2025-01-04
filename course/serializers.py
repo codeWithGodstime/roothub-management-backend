@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from authentication.models import Instructor, Student
-from .models import Course, CourseSession, StudentCourseSession, StudentCourse
+from .models import Course, CourseSession
 
 
 class CourseSerializer:
@@ -55,34 +55,38 @@ class CourseSessionSerializer:
             fields = ['start_date', "course"]
 
     class CourseSessionRetrieveSerializer(serializers.ModelSerializer):
+        course = serializers.SerializerMethodField()
         class Meta:
             model = CourseSession
-            fields = "__all__"
+            fields = [
+                "id",
+                "start_date",
+                "estimated_end_date",
+                "end_date",
+                "course",
+                "is_active",
+                "created_at",
+                "updated_at"
+            ]
 
-    class AddStudentCourseSessionSession(serializers.ModelSerializer):
+        def get_course(self, obj):
+            return obj.course.name
 
+    class AddStudentToSessionSerializer(serializers.Serializer):
         student_id = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all())
-        class Meta:
-            model = CourseSession
-            fields = ["student_id"]
+
+        def validate(self, data):
+            student = data.get('student_id')
+            session = self.context.get("session")
+            print(session, "session==")
+
+            # Check if the student is already associated with the session
+            if Student.objects.filter(id=student.id, session=session).exists():
+                raise serializers.ValidationError("The student is already added to this session.")
+            return data
 
         def save(self, **kwargs):
-            session = self.context.get("session")  # Get the session instance from the context
-            student = self.validated_data["student_id"]
-            print(session, "==sesssion")
-
-            # Add the student to the session's many-to-many relationship
-            session.students.add(student)
-            return session
-
-# class StudentCourseSessionSerializer:
-#     class StudentCourseSessionCreateSerializer(serializers.ModelSerializer):
-#         class Meta:
-#             model = StudentCourseSession
-#             fields = ["student", "course"]
-        
-    
-#     class StudentCourseSessionRetrieveSerializer(serializers.ModelSerializer):
-#         class Meta:
-#             model = StudentCourseSession
-#             fields = ["student", "course", "created_at", "updated_at"]
+            student = self.validated_data['student_id']
+            student.session = self.context.get("session")
+            student.save()
+            return student

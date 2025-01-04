@@ -13,7 +13,6 @@ from django.conf import settings
 from drf_spectacular.utils import extend_schema_field, extend_schema, extend_schema_view, OpenApiParameter
 from utils.util_functions import generate_passwords
 
-# , , InstructorSerializer
 from .serializers import UserSerializer, TokenObtainSerializer, ProgramSerializer, StudentSerializer, InstructorSerializer
 
 from course.models import Course, StudentCourse
@@ -127,8 +126,7 @@ class UserViewset(viewsets.ModelViewSet):
 
         copy_data = request.data.copy()
         generated_password = generate_passwords()
-        logger.debug(f"Generated password for new student: {
-                     generated_password}")
+        logger.debug(f"Generated password for new student: {generated_password}")
 
         serializer = StudentSerializer.StudentCreateSerializer(
             data=copy_data,
@@ -142,14 +140,13 @@ class UserViewset(viewsets.ModelViewSet):
             prog = student.program
             course = prog.courses.all().order_by('level').first()
             if course:
-                logger.info(f"Assigning student {
-                            student.id} to course {course.id}")
+                logger.info(f"Assigning student {student.id} to course {course.id}")
+                # m2m relationship
                 StudentCourse.objects.create(
                     student=student,
                     course=course
                 )
-                logger.info(
-                    f"Student {student.id} added to course {course.id}")
+                logger.info(f"Student {student.id} added to course {course.id}")
 
             message = f"""
                 Your account details are
@@ -161,16 +158,14 @@ class UserViewset(viewsets.ModelViewSet):
             logger.info(f"Email sent successfully to: {student.user.email}")
 
             # TODO: Send notification to instructor of the course
-            logger.info(f"Notification to instructor about student {
-                        student.id} needs to be sent.")
+            logger.info(f"Notification to instructor about student {student.id} needs to be sent.")
 
             message = f"Student registration is successful, user credentials have been sent to {
                 copy_data['user']['email']}"
             logger.info(message)
             return Response({"detail": message}, status=status.HTTP_201_CREATED)
         else:
-            logger.error(f"Student registration failed due to invalid data: {
-                         serializer.errors}")
+            logger.error(f"Student registration failed due to invalid data: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -315,7 +310,6 @@ class StudentViewset(viewsets.ReadOnlyModelViewSet):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer.StudentRetrieveSerializer
     permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
-
 
 @extend_schema(tags=['Instructors'])
 class InstructorViewset(viewsets.ReadOnlyModelViewSet):

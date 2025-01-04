@@ -5,29 +5,29 @@ from drf_spectacular.utils import extend_schema_field, extend_schema, extend_sch
 
 from .serializers import CourseSerializer, CourseSessionSerializer
 from .permissions import IsAdminOrInstructorForSession
-from .models import Course, CourseSession, StudentCourseSession, StudentCourse
+from .models import Course, CourseSession
 
 
 
-# @extend_schema(tags=['CourseSession'])
-# class CourseSessionViewset(viewsets.ModelViewSet):
-#     queryset = CourseSession.objects.all()
-#     serializer_class = CourseSessionSerializer.CourseSessionRetrieveSerializer
-#     permission_classes = [IsAdminOrInstructorForSession, permissions.IsAuthenticated]
+@extend_schema(tags=['CourseSession'])
+class CourseSessionViewset(viewsets.ModelViewSet):
+    queryset = CourseSession.objects.all()
+    serializer_class = CourseSessionSerializer.CourseSessionRetrieveSerializer
+    permission_classes = [IsAdminOrInstructorForSession, permissions.IsAuthenticated]
 
-#     @extend_schema(
-#             request=StudentCourseSessionSerializer.StudentCourseSessionCreateSerializer, 
-#             responses=CourseSessionSerializer.CourseSessionRetrieveSerializer
-#     )
-#     @action(methods=['post'], detail=True)
-#     def add(self, request, *args, **kwargs):
-#         session = self.get_object()
-#         serializer = StudentCourseSessionSerializer.StudentCourseSessionCreateSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
+    @extend_schema(
+            request=CourseSessionSerializer.AddStudentToSessionSerializer, 
+            responses=CourseSessionSerializer.CourseSessionRetrieveSerializer
+    )
+    @action(methods=['post'], detail=True)
+    def add_student_session(self, request, *args, **kwargs):
+        session = self.get_object()
+        serializer = CourseSessionSerializer.AddStudentToSessionSerializer(data=request.data, context={"session": session})
+        serializer.is_valid(raise_exception=True)
         
-#         session = serializer.save()
-#         serialized_session = CourseSessionSerializer.CourseSessionRetrieveSerializer(data=session).data
-#         return Response(serialized_session, status=status.HTTP_200_OK)
+        session = serializer.save()
+        # serialized_session = CourseSessionSerializer.CourseSessionRetrieveSerializer(data=session).data
+        return Response({"message": f"Student added to course session {session.id}"}, status=status.HTTP_200_OK)
 
 
 @extend_schema(tags=['Course'])

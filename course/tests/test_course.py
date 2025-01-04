@@ -57,21 +57,15 @@ class TestCourse:
 
 
 class TestCourseSession:
-    def test_instructor_can_add_student_to_course_session(self, api_client, instructor_fixture, course_with_instructor_fixture, program_factory_fixture, student_factory_fixture, course_session_fixture):
-        instructor = instructor_fixture()
-        program = program_factory_fixture()
-        course = course_with_instructor_fixture.create(instructor=instructor, program=program)
-        course_session = course_session_fixture.create(course=course)
-        print(course_session, "course_session===", course_session.id)
-        student = student_factory_fixture()
-        print(instructor.user)
-        api_client.force_authenticate(user=instructor.user)
 
-        response = api_client.post(
-            reverse("sessions-add", args=[course_session.id]),
-            {
-                "student_id": student.id,
-            }
-        )
-        print(response.data)
-        assert response.status_code == 200
+    def test_a_session_is_created_when_course_is_created(self, api_client, admin_user, program_factory_fixture, instructor_fixture, course_factory_fixture):
+        
+        program = program_factory_fixture()
+        instructor = instructor_fixture()
+        course = course_factory_fixture(program=program, instructor=instructor)
+
+        api_client.force_authenticate(user=admin_user)
+
+        # get course session
+        session = models.CourseSession.objects.filter(course=course).exists()
+        assert session

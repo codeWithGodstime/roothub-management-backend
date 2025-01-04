@@ -5,7 +5,6 @@ from django.core.mail import send_mail
 
 from .managers import UserManager
 from utils.model_mixins import BaseModelMixin
-# from course.models import Course, CourseSession
 
 
 class User(AbstractBaseUser, PermissionsMixin, BaseModelMixin):
@@ -48,11 +47,15 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModelMixin):
     class Meta:
         ordering = ["-created_at"]
 
+    @property
+    def fullname(self):
+        return f"{self.first_name} {self.last_name}"
+
     def email_user(self, subject, message, from_email=None, **kwargs):
         """Send an email to this user."""
         # send_mail(subject, message, from_email, [self.email], fail_silently=True, **kwargs) #TODO: fix email is not sending
         send_mail(subject, message, from_email, [
-                  self.email], fail_silently=True, **kwargs)  # TODO: fix email is not sending
+                  self.email], fail_silently=True, **kwargs)  # TODO: fix email is not sending in production
 
 
 class Program(BaseModelMixin):
@@ -79,10 +82,15 @@ class Instructor(BaseModelMixin):
 
 
 class InstructorSkill(BaseModelMixin):
-    instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
+    instructor = models.ForeignKey(
+        Instructor,
+        related_name="skills",
+        on_delete=models.CASCADE
+    )
     name = models.CharField(max_length=50, unique=True)
     is_primary = models.BooleanField(default=False)
-
+    class Meta:
+        unique_together = ('instructor', 'is_primary')
 
 class Student(BaseModelMixin):
 
@@ -97,14 +105,10 @@ class Student(BaseModelMixin):
         Program, related_name="students", on_delete=models.RESTRICT)
     courses = models.ManyToManyField(
         "course.Course", through="course.StudentCourse", related_name="students")
-
+    session = models.ForeignKey("course.CourseSession", related_name="students", on_delete=models.RESTRICT, null=True, blank=True) #student can exist without been assigned to a course
 
 class StudentPayment(BaseModelMixin):
-
     amount = models.DecimalField(decimal_places=2, max_digits=16)
     student = models.ForeignKey(Student, on_delete=models.DO_NOTHING)
     payment_date = models.DateField()
 
-
-# class StudentCourseSession(BaseModelMixin):
-#     student =

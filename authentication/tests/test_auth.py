@@ -2,7 +2,7 @@ import pytest
 
 from django.urls import reverse
 
-from utils.strategies import CreateStrategy, UpdateStrategy, TestStrategyRunner
+from utils.strategies import CreateStrategy, UpdateStrategy, ListStrategy, TestStrategyRunner
 from utils.test_helper import TestHelper
 from authentication import models
 from course.models import Course
@@ -103,7 +103,8 @@ class TestUserViewsetCreation:
 
     def test_student_is_added_to_course_on_registration(self, api_client, admin_user, program_factory_fixture, course_factory_fixture):
         program = program_factory_fixture(duration=3)
-        course = course_factory_fixture(level=1, duration=1, name=f"{program.name}-basic", program=program)
+        course = course_factory_fixture(level=1, duration=1, name=f"{
+                                        program.name}-basic", program=program)
         request_data = TestHelper().generate_test_data('student', program.id)
         api_client.force_authenticate(user=admin_user)
         unique = request_data['user']['email']
@@ -131,7 +132,7 @@ class TestUserViewsetCreation:
 class TestAccounts:
     def test_forget_password_valid_email(self, api_client, user_factory_fixture):
         user = user_factory_fixture()
-        
+
         payload = {"email": user.email}
         response = api_client.post(reverse('users-reset-password'), payload)
         print(response.data)
@@ -142,9 +143,9 @@ class TestAccounts:
         payload = {"email": "test@gmail.com"}
         response = api_client.post(reverse('users-reset-password'), payload)
         print(response.data)
-        
+
         assert response.status_code == 404
-        assert response.data["error"] == "User with credentials not found"
+        assert response.data["error"] == "User with email not found"
 
     def test_forget_password_missing_email(self, api_client):
         payload = {}
@@ -164,7 +165,6 @@ class TestAccounts:
             data={"token": f"{user.id}:{token}", "new_password": new_password},
             format="json",
         )
-        print(response.data)
 
         assert response.status_code == 200
         assert response.data["message"] == "Password updated successfully."
@@ -235,7 +235,31 @@ class TestProgram:
 
         # check is courses is created
         # based on the duration check the number of course created 4- months basic, beginner, intermediate, advanced
-        # 3 - beginner, intermediate, advanced  
+        # 3 - beginner, intermediate, advanced
         courses = Course.objects.all()
         assert len(courses) == request_data["duration"]
 
+
+class TestStudent:
+    def test_list_student_endpoint(self, api_client, admin_user, student_factory_fixture):
+        students = student_factory_fixture.create_batch(10)
+
+        api_client.force_authenticate(user=admin_user)
+
+        TestStrategyRunner.execute(
+            ListStrategy(
+                api_client,
+                reverse("students-list"),
+                [
+                    "id",
+                    "user",
+                    "program",
+                    "type",
+                    "created_at",
+                    "updated_at",
+                    "payment_plan",
+                    "course",
+                    "session",
+                ]
+            )
+        )

@@ -35,9 +35,13 @@ class CourseSession(BaseModelMixin):
         related_name='sessions', 
         on_delete=models.CASCADE
     )
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
 
-class StudentCourse(models.Model):
+    def get_instructor(self):
+        """should get instructor fullname"""
+        return self.course.user.fullname()
+
+class StudentCourse(BaseModelMixin):
     student = models.ForeignKey("authentication.Student", on_delete=models.CASCADE)
     course = models.ForeignKey('course.Course', on_delete=models.CASCADE)
     class Meta:

@@ -163,6 +163,7 @@ class StudentSerializer:
 
     class StudentRetrieveSerializer(serializers.ModelSerializer):
         user = UserSerializer.UserRetrieveSerializer()
+        course = serializers.SerializerMethodField()
 
         class Meta:
             model = Student
@@ -173,9 +174,20 @@ class StudentSerializer:
                 "type",
                 "created_at",
                 "updated_at",
-                "payment_plan"
+                "payment_plan",
+                "course",
+                "session",
             )
 
+        def get_course(self, obj) -> str:
+            from course.models import StudentCourse
+            from django.shortcuts import get_object_or_404
+
+            student_course = StudentCourse.objects.filter(student=obj.id).order_by("-created_at").first()
+            # print(f"get student_course {student_course.course.name}==")
+            return student_course.course.name if student_course else None
+
+  
 
 class InstructorSkillSerializer(serializers.ModelSerializer):
     class Meta:
@@ -214,13 +226,42 @@ class InstructorSerializer(serializers.ModelSerializer):
                 for skill_data in skills_data
             ]
             InstructorSkill.objects.bulk_create(skill_instances)
-
             return instructor
 
     class InstructorRetrieveSerializer(serializers.ModelSerializer):
+
+        fullname = serializers.SerializerMethodField()
+        expertise = serializers.SerializerMethodField()
+        number_of_active_trainees = serializers.SerializerMethodField()
+        payment_due = serializers.SerializerMethodField()
+        sessions = serializers.SerializerMethodField()
+
         class Meta:
             model = Instructor
-            fields = "__all__"
+            fields = [
+                "id",
+                "fullname",
+                "expertise",
+                "number_of_active_trainees",
+                "sessions",
+                "payment_due"
+            ]
+
+        def get_expertise(self, obj) -> str:
+            skill = obj.skills.filter(is_primary=True).first()
+            return skill.name if skill else None
+        
+        def get_number_of_active_trainees(self, obj) -> int:
+            return 10
+
+        def get_payment_due(self, obj) -> int:
+            return 10000
+
+        def get_sessions(self, obj) -> int:
+            return 100
+
+        def get_fullname(self, obj) -> str:
+            return obj.user.fullname
 
 
 class ProgramSerializer:

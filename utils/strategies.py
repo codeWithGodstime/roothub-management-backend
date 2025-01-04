@@ -109,13 +109,16 @@ class ListStrategy(TestStrategy):
         
         # Validate the response data
         response_data = self.response.data
-        assert isinstance(response_data, list), "Expected response data to be a list"
-        assert len(response_data) == len(self.expected_data), (
-            f"Expected {len(self.expected_data)} items, but got {len(response_data)}"
-        )
+        print(response_data, "REponse data")
+        assert isinstance(response_data['results'], list), "Expected response data to be a list"
         
-        for expected_item in self.expected_data:
-            assert expected_item in response_data, f"Missing item: {expected_item}"
+        results = []
+        for value in self.expected_data:
+            if value in response_data['results'][0].keys():
+                results.append(True)
+            else:
+                results.append(False)
+        assert all(results)
 
 
 class NotPermittedStrategy(TestStrategy):

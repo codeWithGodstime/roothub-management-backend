@@ -8,7 +8,7 @@ services:
       - .:/app
     depends_on:
       - db
-      - redis
+      # - redis
     ports:
       - 8000:8000
 
@@ -32,15 +32,15 @@ services:
       - 1025:1025
       - 8025:8025
 
-  celery_worker:
-    build: .
-    image: roothub-backend-celery
-    command: celery -A roothub worker -l info
-    volumes:
-      - .:/app
-    depends_on:
-      - redis
-      - backend
+  # celery_worker:
+  #   build: .
+  #   image: roothub-backend-celery
+  #   command: celery -A roothub worker -l info
+  #   volumes:
+  #     - .:/app
+  #   depends_on:
+  #     - redis
+  #     - backend
 
   # celery_beat:
   #   build: .
@@ -52,8 +52,8 @@ services:
   #     - redis
   #     - backend
 
-  redis:
-    image: redis:alpine
+  # redis:
+  #   image: redis:alpine
 
 volumes:
   postgres_data:

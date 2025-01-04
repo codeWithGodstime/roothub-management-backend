@@ -19,7 +19,7 @@ class CustomIsAdminUser(permissions.IsAdminUser):
         return bool(request.user.is_superuser)
 
 
-@extend_schema_view(tag=["Announcements"])
+@extend_schema_view(tags=["Announcements"])
 class AnnouncementViewset(viewsets.ModelViewSet):
     serializer_class = AnnouncementSerializer.AnnouncementRetrieveSerializer
     queryset = Announcement.objects.all()
