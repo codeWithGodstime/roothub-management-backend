@@ -97,11 +97,14 @@ class DeleteStrategy(TestStrategy):
 
 
 class ListStrategy(TestStrategy):
-    def __init__(self, client: APIClient, url: str, expected_data: list):
+    def __init__(self, client: APIClient, url: str, model:models.Model,  expected_data: list, count: int):
         super().__init__(client, url, {}, expected_data)
+        self.expected_count = count
+        self.model = model
 
     def act(self):
         self.response = self.client.get(self.url, format='json')
+        print("response is==", self.response.data)
 
     def assert_(self):
         # Check the response status code
@@ -109,8 +112,10 @@ class ListStrategy(TestStrategy):
         
         # Validate the response data
         response_data = self.response.data
-        print(response_data, "REponse data")
         assert isinstance(response_data['results'], list), "Expected response data to be a list"
+
+        # check len
+        assert len(response_data['results']) == self.expected_count
         
         results = []
         for value in self.expected_data:
@@ -121,7 +126,7 @@ class ListStrategy(TestStrategy):
         assert all(results)
 
 
-class NotPermittedStrategy(TestStrategy):
+class NotPermittedStrategy(TestStrategy, ABC):
 
     def __init__(self, client: APIClient, url: str, data: dict, expected_status_code: int):
         """
@@ -136,6 +141,7 @@ class NotPermittedStrategy(TestStrategy):
         super().__init__(client, url, data, expected_data=None)
         self.expected_status_code = expected_status_code
 
+    @abstractmethod
     def act(self):
         """
         Executes the action by sending a request to the specified URL with the provided data.
@@ -152,6 +158,24 @@ class NotPermittedStrategy(TestStrategy):
         )
 
         assert "detail" in self.response.data, "Response does not contain an error detail"
+
+
+class NotPermittedGetStrategy(NotPermittedStrategy):
+    def act(self):
+        """
+        Executes the action by sending a request to the specified URL with the provided data.
+        """
+        self.response = self.client.get(self.url, format='json')
+        print(self.response.data, self.response.status_code)
+
+
+class NotPermittedPostStrategy(NotPermittedStrategy):
+    def act(self):
+        """
+        Executes the action by sending a request to the specified URL with the provided data.
+        """
+        self.response = self.client.post(self.url, self.data, format='json')
+        print(self.response.data, self.response.status_code)
 
 
 class TestStrategyRunner:

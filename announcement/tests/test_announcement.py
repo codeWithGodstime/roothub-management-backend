@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.core import mail
 from announcement.models import Announcement
 
-from utils.strategies import CreateStrategy, UpdateStrategy, TestStrategyRunner, NotPermittedStrategy
+from utils.strategies import CreateStrategy, UpdateStrategy, TestStrategyRunner, NotPermittedStrategy, NotPermittedPostStrategy
 from utils.test_helper import TestHelper
 
 pytestmark = pytest.mark.django_db
@@ -37,7 +37,7 @@ class TestAnnouncement:
         api_client.force_authenticate(user=student)
 
         TestStrategyRunner.execute(
-            NotPermittedStrategy(
+            NotPermittedPostStrategy(
                 api_client,
                 reverse("announcements-list"),
                 request_data,
@@ -52,7 +52,7 @@ class TestAnnouncement:
         api_client.force_authenticate(user=staff)
 
         TestStrategyRunner.execute(
-            NotPermittedStrategy(
+            NotPermittedPostStrategy(
                 api_client,
                 reverse("announcements-list"),
                 request_data,

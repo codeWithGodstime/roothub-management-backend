@@ -2,10 +2,10 @@ import pytest
 
 from django.urls import reverse
 
-from utils.strategies import CreateStrategy, UpdateStrategy, ListStrategy, TestStrategyRunner
+from utils.strategies import CreateStrategy, UpdateStrategy, ListStrategy, NotPermittedGetStrategy, TestStrategyRunner
 from utils.test_helper import TestHelper
 from authentication import models
-from course.models import Course
+from course.models import Course, CourseSession
 
 pytestmark = pytest.mark.django_db
 
@@ -261,5 +261,38 @@ class TestStudent:
                     "course",
                     "session",
                 ]
+            )
+        )
+
+class TestInstructor:
+    def test_instructor_can_see_all_his_active_sessions(self, api_client, instructor_fixture, program_with_course_fixture):
+        instructor = instructor_fixture()
+        prog = program_with_course_fixture(instructor)
+
+        api_client.force_authenticate(user=instructor.user)
+
+        TestStrategyRunner.execute(
+            ListStrategy(
+                api_client,
+                reverse("instructors-active-sessions", args=[instructor.id]),
+                CourseSession,
+                ["id", "start_date", "estimated_end_date", "end_date", "course", "created_at", "is_active"],
+                1
+            )
+        )
+
+    def test_instructor_cannot_see_another_instructor_sessions(self, api_client, instructor_fixture, program_with_course_fixture):
+        owner_instructor = instructor_fixture()
+        program_with_course_fixture = program_with_course_fixture(owner_instructor)
+
+        instructor = instructor_fixture()
+        api_client.force_authenticate(user=instructor.user)
+
+        TestStrategyRunner.execute(
+            NotPermittedGetStrategy(
+                api_client,
+                reverse("instructors-active-sessions", args=[owner_instructor.id]),
+                None,
+                403
             )
         )

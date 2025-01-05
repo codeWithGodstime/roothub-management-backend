@@ -34,13 +34,13 @@ def course_factory_fixture() -> course_factory.CourseFactory:
 
 @pytest.fixture
 def program_with_course_fixture(program_factory_fixture, course_factory_fixture):
-    def create_program_with_courses(course_count=3):
+    def create_program_with_course(instructor):
         # Create a program
         program = program_factory_fixture()
         # Use create course without an instructor
-        courses = course_factory_fixture.create(program=program, instructor=None)
+        courses = course_factory_fixture.create(program=program, instructor=instructor)
         return program, courses
-    return create_program_with_courses
+    return create_program_with_course
 
 @pytest.fixture
 def course_session_fixture() -> coursesession_factory.CourseSessionFactory:

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema_field, extend_schema, extend_schema_view, OpenApiParameter
 
 from .serializers import CourseSerializer, CourseSessionSerializer
-from .permissions import IsAdminOrInstructorForSession
+from utils.permissions import IsAdminOrInstructorForSession
 from .models import Course, CourseSession
 
 
@@ -13,7 +13,7 @@ from .models import Course, CourseSession
 class CourseSessionViewset(viewsets.ModelViewSet):
     queryset = CourseSession.objects.all()
     serializer_class = CourseSessionSerializer.CourseSessionRetrieveSerializer
-    permission_classes = [IsAdminOrInstructorForSession, permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
 
     @extend_schema(
             request=CourseSessionSerializer.AddStudentToSessionSerializer, 
@@ -26,7 +26,6 @@ class CourseSessionViewset(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         
         session = serializer.save()
-        # serialized_session = CourseSessionSerializer.CourseSessionRetrieveSerializer(data=session).data
         return Response({"message": f"Student added to course session {session.id}"}, status=status.HTTP_200_OK)
 
 

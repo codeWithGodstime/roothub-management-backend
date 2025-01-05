@@ -5,7 +5,7 @@ from django.db.models import UniqueConstraint
 
 class Course(BaseModelMixin):
     name = models.CharField(max_length=300, unique=True)
-    instructor = models.OneToOneField(
+    instructor = models.ForeignKey(
         'authentication.Instructor', 
         null=True, 
         blank=True, 

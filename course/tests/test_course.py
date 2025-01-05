@@ -3,7 +3,7 @@ import pytest
 from django.urls import reverse
 
 # from authentication.tests.factories import program_factory
-from utils.strategies import CreateStrategy, UpdateStrategy, TestStrategyRunner
+from utils.strategies import CreateStrategy, UpdateStrategy, ListStrategy, NotPermittedGetStrategy, TestStrategyRunner
 from utils.test_helper import TestHelper
 from course import models
 
@@ -69,3 +69,38 @@ class TestCourseSession:
         # get course session
         session = models.CourseSession.objects.filter(course=course).exists()
         assert session
+
+    def test_only_admin_can_only_see_all_sessions(self, api_client, admin_user, instructor_fixture, program_factory_fixture, course_factory_fixture):
+        program = program_factory_fixture()
+        instructor = instructor_fixture()
+        course = course_factory_fixture(program=program, instructor=instructor)
+
+        api_client.force_authenticate(user=admin_user)
+
+        TestStrategyRunner.execute(
+            ListStrategy(
+                api_client,
+                reverse("sessions-list"),
+                # models.CourseSession,
+                None,
+                ["id", "start_date", "estimated_end_date", "end_date", "is_active", "course", "created_at", "updated_at"],
+                1
+            )
+        )
+    
+    def test_tutor_cannot_see_all_sessions(self, api_client, instructor_fixture, program_factory_fixture, course_factory_fixture):
+        program = program_factory_fixture()
+        instructor = instructor_fixture()
+        course = course_factory_fixture(program=program, instructor=instructor)
+
+        api_client.force_authenticate(user=instructor.user)
+
+        TestStrategyRunner.execute(
+            NotPermittedGetStrategy(
+                api_client,
+                reverse("sessions-list"),
+                None,
+                403
+            )
+        )
+

@@ -13,10 +13,6 @@ class IsAdminOrInstructorForSession(permissions.BasePermission):
         return True  # Defer object-level checks to `has_object_permission`
 
     def has_object_permission(self, request, view, obj):
-        # Allow access if the user is an admin
-        if request.user and request.user.is_staff:
-            return True
-        
         # Allow access if the user is the instructor of the course for the session
         print("obj.course.instructor=",obj.course.instructor.user)
         return obj.course.instructor.user == request.user

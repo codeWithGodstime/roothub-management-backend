@@ -5,6 +5,7 @@ from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import viewsets, permissions, status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.decorators import action
 from rest_framework_simplejwt.views import TokenObtainPairView as SimpleJWTTokenObtainPairView
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -12,11 +13,15 @@ from django.conf import settings
 
 from drf_spectacular.utils import extend_schema_field, extend_schema, extend_schema_view, OpenApiParameter
 from utils.util_functions import generate_passwords
+from utils.permissions import IsAdminOrInstructorForSession
 
 from .serializers import UserSerializer, TokenObtainSerializer, ProgramSerializer, StudentSerializer, InstructorSerializer
 
-from course.models import Course, StudentCourse
+from course.models import Course, StudentCourse, CourseSession
+from course.serializers import CourseSessionSerializer
+
 from .models import Program, Student, Instructor
+
 
 logger = logging.getLogger(__name__)
 
@@ -315,8 +320,31 @@ class StudentViewset(viewsets.ReadOnlyModelViewSet):
 class InstructorViewset(viewsets.ReadOnlyModelViewSet):
     queryset = Instructor.objects.all()
     serializer_class = InstructorSerializer.InstructorRetrieveSerializer
-    permission_classes = [permissions.IsAdminUser, permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
+    @extend_schema(
+            request=None,
+            responses=CourseSessionSerializer.CourseSessionRetrieveSerializer(many=True)
+    )
+    @action(methods=["GET"], detail=True)
+    def active_sessions(self, request, *args, **kwargs):
+        instructor = self.get_object()
+
+        # Check if the logged-in user is the instructor
+        if instructor.user != request.user:
+            raise PermissionDenied("You do not have permission to view these sessions.")
+        
+        sessions = CourseSession.objects.filter(course__instructor=instructor)
+        serializer = CourseSessionSerializer.CourseSessionRetrieveSerializer(sessions, many=True)
+
+        page = self.paginate_queryset(sessions)
+        if page is not None:
+            serializer = CourseSessionSerializer.CourseSessionRetrieveSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        # Fallback if pagination is not enabled
+        serializer = CourseSessionSerializer.CourseSessionRetrieveSerializer(sessions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class TokenObtainPairView(SimpleJWTTokenObtainPairView):
     serializer_class = TokenObtainSerializer
