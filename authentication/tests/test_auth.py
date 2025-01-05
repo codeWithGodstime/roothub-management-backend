@@ -260,7 +260,9 @@ class TestStudent:
                     "payment_plan",
                     "course",
                     "session",
-                ]
+                ],
+                ["id", "user", "program", "type", "created_at", "updated_at", "payment_plan", "course", "session"],
+                10
             )
         )
 

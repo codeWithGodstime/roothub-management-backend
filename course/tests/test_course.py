@@ -33,8 +33,8 @@ class TestCourse:
         )
 
     def test_admin_can_assign_instructor_to_course(self, api_client, admin_user, program_with_course_fixture, instructor_fixture):
-        program, course = program_with_course_fixture()
         instructor = instructor_fixture()
+        program, course = program_with_course_fixture(instructor)
 
         api_client.force_authenticate(user=admin_user)
 
