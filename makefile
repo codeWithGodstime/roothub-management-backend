@@ -15,3 +15,7 @@ migrate:
 # Run tests with coverage in the backend container
 test-coverage:
 	docker-compose exec backend coverage run -m pytest -rP -v && coverage report -m
+
+test-ci:
+	docker compose exec backend coverage run -m pytest -rP -v && coverage report -m
+
