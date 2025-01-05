@@ -17,7 +17,7 @@ test-coverage:
 	docker-compose exec backend coverage run -m pytest -rP -v && coverage report -m
 
 test-ci:
-	dockercompose exec backend coverage run -m pytest -rP -v && coverage report -m
+	docker compose exec backend coverage run -m pytest -rP -v && coverage report -m
 
 build-ci:
-	docker compose up --build -d && docker compose exec backend python manage.py makemigrations && docker compose exec backend python manage.py migrate
+	docker compose build --parallel && docker compose up -d && docker compose exec backend python manage.py makemigrations && docker compose exec backend python manage.py migrate
