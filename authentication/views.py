@@ -187,7 +187,7 @@ class UserViewset(viewsets.ModelViewSet):
         generated_password = generate_passwords()
         logger.debug(f"Generated password for new instructor: {generated_password}")
 
-        serializer = InstructorSerializer.InstructorCreateSerializer(data=copy_data)
+        serializer = InstructorSerializer.InstructorCreateSerializer(data=copy_data, context={"generated_password": generated_password})
         if serializer.is_valid(raise_exception=True):
             logger.info(f"Instructor data validated successfully.")
             instructor = serializer.save()

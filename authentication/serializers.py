@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, Any
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
@@ -12,7 +13,7 @@ from .models import Program, Student, Instructor, StudentPayment, InstructorSkil
 
 User = get_user_model()
 faker = Faker()
-
+logger = logging.getLogger(__file__)
 
 class UserSerializer:
     class UserCreateSerializer(serializers.ModelSerializer):
@@ -221,11 +222,19 @@ class InstructorSerializer(serializers.ModelSerializer):
             instructor = Instructor.objects.create(user=user, **validated_data)
             instructor.save()
 
-            skill_instances = [
-                InstructorSkill(instructor=instructor, **skill_data)
-                for skill_data in skills_data
-            ]
-            InstructorSkill.objects.bulk_create(skill_instances)
+            # skill_instances = [
+            #     InstructorSkill(instructor=instructor, **skill_data)
+            #     for skill_data in skills_data
+            # ]
+            # InstructorSkill.objects.bulk_create(skill_instances)
+            for skill in skills_data:
+                sk, created = InstructorSkill.objects.get_or_create(instructor=instructor, **skill)
+                if created:
+                    logger.info(f"Created new skill: {sk.name} for instructor: {instructor.id}")
+                else:
+                    logger.info(f"Skill already exists: {sk.name} for instructor: {instructor.id}")
+
+
             return instructor
 
     class InstructorRetrieveSerializer(serializers.ModelSerializer):
