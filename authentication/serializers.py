@@ -9,7 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from faker import Faker
 from decimal import Decimal
 
-from .models import Program, Student, Instructor, StudentPayment, InstructorSkill
+from .models import Program, Student, Instructor, StudentPayment, InstructorSkill, Skill
 
 User = get_user_model()
 faker = Faker()
@@ -163,8 +163,13 @@ class StudentSerializer:
             return student
 
     class StudentRetrieveSerializer(serializers.ModelSerializer):
-        user = UserSerializer.UserRetrieveSerializer()
-        course = serializers.SerializerMethodField()
+        user = serializers.SerializerMethodField()
+        program = serializers.SerializerMethodField()
+        amount_paid = serializers.SerializerMethodField()
+        balance = serializers.SerializerMethodField()
+        tutor = serializers.SerializerMethodField()
+        level = serializers.SerializerMethodField()
+        amount_paid = serializers.SerializerMethodField()
 
         class Meta:
             model = Student
@@ -172,35 +177,56 @@ class StudentSerializer:
                 "id",
                 "user",
                 "program",
-                "type",
-                "created_at",
-                "updated_at",
-                "payment_plan",
-                "course",
-                "session",
+                "tutor",
+                "level",
+                "balance",
+                "amount_paid",
+                "type"
             )
 
-        def get_course(self, obj) -> str:
-            from course.models import StudentCourse
-            from django.shortcuts import get_object_or_404
+        def get_user(self, obj) -> str:
+            return obj.user.fullname
+        
+        def get_program(self, obj) -> str:
+            return obj.program.name
 
-            student_course = StudentCourse.objects.filter(student=obj.id).order_by("-created_at").first()
-            # print(f"get student_course {student_course.course.name}==")
-            return student_course.course.name if student_course else None
+        def get_tutor(self, obj) -> str:
+            return obj.get_latest_tutor
 
+        def get_level(self, obj) -> str:
+            level = {
+                "0": "Beginner",
+                "1": "Basic",
+                "2": "Intermediate",
+                "3": "Advanced"
+            }
+            return level[obj.get_latest_level] if obj.get_latest_level else level["0"]
+        
+        def get_balance(self, obj) -> float:
+            return 0.00
+
+        def get_amount_paid(self, obj) -> float:
+            return 1000
+
+
+class SkillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Skill
+        fields = ['name']
   
 
 class InstructorSkillSerializer(serializers.ModelSerializer):
+    skill = SkillSerializer()
     class Meta:
         model = InstructorSkill
-        fields = ["name", "is_primary"]
+        fields = ["skill", "is_primary"]
 
 
 class InstructorSerializer(serializers.ModelSerializer):
 
     class InstructorCreateSerializer(serializers.ModelSerializer):
         user = UserSerializer.UserCreateSerializer()
-        skills = InstructorSkillSerializer(many=True)
+        skills = skills = InstructorSkillSerializer(many=True)
 
         class Meta:
             model = Instructor
@@ -218,22 +244,22 @@ class InstructorSerializer(serializers.ModelSerializer):
                 user = User.objects.create_instructor(
                     password=self.context.get("generated_password"), **user)
                 user.save()
-
             instructor = Instructor.objects.create(user=user, **validated_data)
-            instructor.save()
 
-            # skill_instances = [
-            #     InstructorSkill(instructor=instructor, **skill_data)
-            #     for skill_data in skills_data
-            # ]
-            # InstructorSkill.objects.bulk_create(skill_instances)
             for skill in skills_data:
-                sk, created = InstructorSkill.objects.get_or_create(instructor=instructor, **skill)
+                name = skill['skill']['name'].lower()
+                is_primary=skill["is_primary"]
+                sk, created = Skill.objects.get_or_create(name=name)
                 if created:
                     logger.info(f"Created new skill: {sk.name} for instructor: {instructor.id}")
                 else:
                     logger.info(f"Skill already exists: {sk.name} for instructor: {instructor.id}")
-
+                
+                InstructorSkill.objects.create(
+                    instructor_id=instructor,
+                    skill_id=sk,
+                    is_primary=is_primary
+                )
 
             return instructor
 
@@ -257,8 +283,9 @@ class InstructorSerializer(serializers.ModelSerializer):
             ]
 
         def get_expertise(self, obj) -> str:
-            skill = obj.skills.filter(is_primary=True).first()
-            return skill.name if skill else None
+            primary_skill = obj.instructorskill_set.filter(is_primary=True).select_related("skill_id").first()
+            return primary_skill.skill.name if primary_skill else None
+
         
         def get_number_of_active_trainees(self, obj) -> int:
             return 10

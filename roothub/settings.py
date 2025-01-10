@@ -41,9 +41,11 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     "DEFAULT_PAGINATION_CLASS": 'rest_framework.pagination.LimitOffsetPagination',
-    # 'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'PAGE_SIZE': 20
 }
 
@@ -171,8 +173,8 @@ else:
 DEFAULT_FROM_EMAIL = "noreply@roothub.com"
 PASSWORD_RESET_BASE_URL = "https://yourfrontend.com/reset-password"
 
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER", "redis://redis:6379/0")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_BACKEND", "redis://redis:6379/0")
+# CELERY_BROKER_URL = os.getenv("CELERY_BROKER", "redis://redis:6379/0")
+# CELERY_RESULT_BACKEND = os.getenv("CELERY_BACKEND", "redis://redis:6379/0")
 
 
 LOGGING = {

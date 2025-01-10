@@ -55,7 +55,8 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModelMixin):
         """Send an email to this user."""
         # send_mail(subject, message, from_email, [self.email], fail_silently=True, **kwargs) #TODO: fix email is not sending
         send_mail(subject, message, from_email, [
-                  self.email], fail_silently=True, **kwargs)  # TODO: fix email is not sending in production
+                  # TODO: fix email is not sending in production
+                  self.email], fail_silently=True, **kwargs)
 
 
 class Program(BaseModelMixin):
@@ -75,22 +76,33 @@ class Program(BaseModelMixin):
 
 class Instructor(BaseModelMixin):
     user = models.OneToOneField(
-        User, on_delete=models.DO_NOTHING, related_name="instructor")
+        User, on_delete=models.CASCADE, related_name="instructor")
     account_number = models.CharField(max_length=50, null=True, blank=True)
     account_name = models.CharField(max_length=100, null=True, blank=True)
     bank_name = models.CharField(max_length=200, null=True, blank=True)
+    skills = models.ManyToManyField(
+        "Skill",
+        through='InstructorSkill'
+    )
+
+
+class Skill(BaseModelMixin):
+    name = models.CharField(max_length=50, unique=True)
 
 
 class InstructorSkill(BaseModelMixin):
-    instructor = models.ForeignKey(
-        Instructor,
-        related_name="skills",
-        on_delete=models.CASCADE
-    )
-    name = models.CharField(max_length=50, unique=True)
+    instructor_id = models.ForeignKey(Instructor, on_delete=models.CASCADE)
+    skill_id = models.ForeignKey(Skill, on_delete=models.CASCADE)
     is_primary = models.BooleanField(default=False)
+
     class Meta:
-        unique_together = ('instructor', 'is_primary')
+        constraints = [
+            models.UniqueConstraint(
+                fields=["instructor_id", "is_primary"],
+                name="single_instructor_primary_skill"
+            )
+        ]
+
 
 class Student(BaseModelMixin):
 
@@ -98,17 +110,39 @@ class Student(BaseModelMixin):
     payment_plan = {p: p for p in ['FULL', "PART", "NOT PAID"]}
 
     user = models.OneToOneField(
-        User, related_name="student", on_delete=models.DO_NOTHING)
+        User, related_name="student", on_delete=models.CASCADE)
     type = models.CharField(max_length=300, choices=type)
     payment_plan = models.CharField(max_length=40, choices=payment_plan)
     program = models.ForeignKey(
         Program, related_name="students", on_delete=models.RESTRICT)
     courses = models.ManyToManyField(
         "course.Course", through="course.StudentCourse", related_name="students")
-    session = models.ForeignKey("course.CourseSession", related_name="students", on_delete=models.RESTRICT, null=True, blank=True) #student can exist without been assigned to a course
+    session = models.ForeignKey("course.CourseSession", related_name="students", on_delete=models.RESTRICT,
+                                null=True, blank=True)  # student can exist without been assigned to a course
+
+    @property
+    def get_latest_tutor(self):
+        # Get the latest course the student is enrolled in (using the StudentCourse through model)
+        latest_course = self.courses.order_by(
+            'studentcourse__created_at').last()
+
+        if latest_course and latest_course.instructor:
+            # Return the instructor (tutor) for the latest course
+            return latest_course.instructor
+        return None  # Return None if no tutor found or no course is found
+
+    @property
+    def get_latest_level(self):
+        # Get the latest course the student is enrolled in from the many-to-many relationship
+        latest_course = self.courses.order_by(
+            '-studentcourse__created_at').first()
+
+        if latest_course:
+            return latest_course.level
+        return None  # Return None if no course found
+
 
 class StudentPayment(BaseModelMixin):
     amount = models.DecimalField(decimal_places=2, max_digits=16)
     student = models.ForeignKey(Student, on_delete=models.DO_NOTHING)
     payment_date = models.DateField()
-

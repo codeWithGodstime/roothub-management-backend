@@ -54,6 +54,21 @@ class TestUserViewsetCreation:
         qs = models.User.objects.get(email=unique)
         assert qs.is_instructor
 
+    def test_admin_can_get_all_instructors(self, api_client, admin_user, instructor_fixture):
+        api_client.force_authenticate(user=admin_user)
+        instructors = instructor_fixture.create_batch(20)
+
+        TestStrategyRunner.execute(
+            ListStrategy(
+                api_client,
+                reverse("instructors-list"),
+                models.Instructor,
+                ["id", "fullname", "number_of_active_trainees",
+                    "sessions", "payment_due", "expertise"],
+                20
+            )
+        )
+
     def test_create_student_user(self, api_client, admin_user, program_factory_fixture):
 
         program = program_factory_fixture()
@@ -135,14 +150,12 @@ class TestAccounts:
 
         payload = {"email": user.email}
         response = api_client.post(reverse('users-reset-password'), payload)
-        print(response.data)
         assert response.status_code == 200
         assert response.data["message"] == "We have sent you a link to reset your password"
 
     def test_forget_password_invalid_email(self, api_client):
         payload = {"email": "test@gmail.com"}
         response = api_client.post(reverse('users-reset-password'), payload)
-        print(response.data)
 
         assert response.status_code == 404
         assert response.data["error"] == "User with email not found"
@@ -250,21 +263,21 @@ class TestStudent:
             ListStrategy(
                 api_client,
                 reverse("students-list"),
-                [
+                model=models.Student,
+                expected_data=[
                     "id",
                     "user",
                     "program",
-                    "type",
-                    "created_at",
-                    "updated_at",
-                    "payment_plan",
-                    "course",
-                    "session",
+                    "tutor",
+                    "level",
+                    "balance",
+                    "amount_paid",
+                    "type"
                 ],
-                ["id", "user", "program", "type", "created_at", "updated_at", "payment_plan", "course", "session"],
-                10
+                count=10
             )
         )
+
 
 class TestInstructor:
     def test_instructor_can_see_all_his_active_sessions(self, api_client, instructor_fixture, program_with_course_fixture):
@@ -278,14 +291,16 @@ class TestInstructor:
                 api_client,
                 reverse("instructors-active-sessions", args=[instructor.id]),
                 CourseSession,
-                ["id", "start_date", "estimated_end_date", "end_date", "course", "created_at", "is_active"],
+                ["id", "start_date", "estimated_end_date",
+                    "end_date", "course", "created_at", "is_active"],
                 1
             )
         )
 
     def test_instructor_cannot_see_another_instructor_sessions(self, api_client, instructor_fixture, program_with_course_fixture):
         owner_instructor = instructor_fixture()
-        program_with_course_fixture = program_with_course_fixture(owner_instructor)
+        program_with_course_fixture = program_with_course_fixture(
+            owner_instructor)
 
         instructor = instructor_fixture()
         api_client.force_authenticate(user=instructor.user)
@@ -293,7 +308,8 @@ class TestInstructor:
         TestStrategyRunner.execute(
             NotPermittedGetStrategy(
                 api_client,
-                reverse("instructors-active-sessions", args=[owner_instructor.id]),
+                reverse("instructors-active-sessions",
+                        args=[owner_instructor.id]),
                 None,
                 403
             )
