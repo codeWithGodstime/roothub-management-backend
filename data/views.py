@@ -25,12 +25,12 @@ fake = Faker()
 class GenerateSerializer(serializers.Serializer):
     model = serializers.ChoiceField(
         choices=[
-            ('course', 'course'),
+            ('courses', 'courses'),
             ('users', 'users'),
-            ('instructor', 'instructor'),
+            ('instructors', 'instructors'),
             ('students', 'students'),
-            ('program', 'program'),
-            ("announcement", "announcement")
+            ('programs', 'programs'),
+            ("announcements", "announcements")
         ]
     )
     number = serializers.IntegerField()
@@ -53,16 +53,16 @@ class GenerateData(APIView):
 
             factory_map = {
                 'users': UserFactory,
-                'instructor': InstructorFactory,
+                'instructors': InstructorFactory,
                 'students': StudentFactory,
-                'program': ProgramFactory,
-                'announcement': AnnouncementFactory
+                'programs': ProgramFactory,
+                'announcements': AnnouncementFactory
             }
 
             if model not in factory_map:
                 return Response({"error": "Invalid model specified."}, status=400)
 
-            if model == "program":
+            if model == "programs":
                 # Create programs
                 created_programs = set([ProgramFactory()
                                        for _ in range(1, number)])
@@ -71,7 +71,6 @@ class GenerateData(APIView):
                 levels = ["beginner", "basic", "intermediate", "advanced"]
 
                 for program in created_programs:
-                    print("program name", program.name, program.duration)
 
                     for l in range(int(program.duration)):
                         course = CourseFactory(program=program, name=f"{program.name}-{levels[l]}", level=l)
@@ -86,7 +85,7 @@ class GenerateData(APIView):
                 }, status=201)
 
             # Special handling for instructors
-            if model == "instructor":
+            if model == "instructors":
                 created_instructors = []
                 programming_skills = [
                     "Python", "Excel", "Kotlin",
@@ -102,11 +101,9 @@ class GenerateData(APIView):
                     num_skills = fake.random_int(min=1, max=5) 
 
                     skills = set([fake.random_element(elements=programming_skills) for _ in range(num_skills)])
-                    print("SKills=", skills)
                     for index, name in enumerate(skills):
                         try:
                             InstructorSkill.objects.get_or_create(
-                                instructor=instructor,
                                 is_primary=(index == 0),  # First skill is primary
                                 name=name
                             )
