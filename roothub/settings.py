@@ -1,16 +1,20 @@
 import os
 from pathlib import Path
 from datetime import timedelta
+import environ
 
-from decouple import config
+env = environ.Env(
+    DEBUG=(bool, False)
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-SECRET_KEY = config("SECRET_KEY", default="secret_key123")
+SECRET_KEY = env("SECRET_KEY", default="secret_key123")
 
-DEBUG = config("DEBUG", cast=bool, default=True)  # TODO change this later
+DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default='localhost').split(",")
+ALLOWED_HOSTS = env("ALLOWED_HOSTS", default='localhost').split(",")
 
 INSTALLED_APPS = [
     # disable Django"s static file handling and allow WhiteNoise to take over
@@ -41,9 +45,11 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     "DEFAULT_PAGINATION_CLASS": 'rest_framework.pagination.LimitOffsetPagination',
-    # 'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'PAGE_SIZE': 20
 }
 
@@ -71,10 +77,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:8000",
-]
+CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS").split(",")
 
 ROOT_URLCONF = 'roothub.urls'
 
@@ -96,17 +99,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'roothub.wsgi.application'
 
-
-# https://docs.djangoproject.com/en/dev/ref/settings/#databases
-# if you're not using docker
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
-# For Docker/PostgreSQL usage uncomment this and comment the DATABASES config above
+# For Docker/PostgreSQL usage uncomment this and comment the DATABASES os.getenv above
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -150,7 +143,6 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 if DEBUG:
-
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'mailhog'
     EMAIL_PORT = 1025
@@ -158,25 +150,23 @@ if DEBUG:
     EMAIL_USE_SSL = False
     EMAIL_HOST_USER = ''
     EMAIL_HOST_PASSWORD = ''
-
 else:
-    EMAIL_BACKEND = config("EMAIL_BACKEND")
-    EMAIL_HOST = config("EMAIL_HOST")
-    EMAIL_PORT = config("EMAIL_PORT")
-    EMAIL_USE_TLS = config("EMAIL_USE_TLS")
-    EMAIL_USE_SSL = config("EMAIL_USE_SSL")
-    EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
-    EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+    EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+    EMAIL_HOST = os.getenv("EMAIL_HOST")
+    EMAIL_PORT = os.getenv("EMAIL_PORT")
+    EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
+    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 
 DEFAULT_FROM_EMAIL = "noreply@roothub.com"
 PASSWORD_RESET_BASE_URL = "https://yourfrontend.com/reset-password"
 
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER", "redis://redis:6379/0")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_BACKEND", "redis://redis:6379/0")
-
+# CELERY_BROKER_URL = os.getenv("CELERY_BROKER", "redis://redis:6379/0")
+# CELERY_RESULT_BACKEND = os.getenv("CELERY_BACKEND", "redis://redis:6379/0")
 
 LOGGING = {
-    "version": 1,  # the dictConfig format version
+    "version": 1,  # the dictos.getenv format version
     "disable_existing_loggers": False,  # retain the default loggers
     "handlers": {
         "file": {

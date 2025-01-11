@@ -14,5 +14,4 @@ class IsAdminOrInstructorForSession(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Allow access if the user is the instructor of the course for the session
-        print("obj.course.instructor=",obj.course.instructor.user)
         return obj.course.instructor.user == request.user

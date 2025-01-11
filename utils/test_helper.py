@@ -29,13 +29,11 @@ class TestHelper:
             "user": self.user_data(),
             "skills": [
                 {
-                    "name": 'python',
+                    "skill": {
+                        "name": "python"
+                    },
                     "is_primary": True
-                },
-                {
-                    "name": "web development",
-                    "is_primary": False
-                },
+                }
             ],
             "account_number": faker.bban(),
             "account_name": faker.name(),

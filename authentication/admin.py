@@ -45,7 +45,7 @@ class InstructorAdmin(admin.ModelAdmin):
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('user', 'type', 'payment_plan', 'program', 'session', 'created_at')
+    list_display = ('user', 'type', 'payment_plan', 'program__name', 'session', 'created_at')
     list_filter = ('type', 'payment_plan', 'program', 'session')
     search_fields = ('user__email', 'program__name')
     ordering = ('-created_at',)
@@ -57,3 +57,8 @@ class StudentPaymentAdmin(admin.ModelAdmin):
     search_fields = ('student__user__email',)
     ordering = ('-created_at',)
     readonly_fields = ('created_at', 'updated_at')
+
+@admin.register(InstructorSkill)
+class InstructorSkillAdmin(admin.ModelAdmin):
+    # list_display = []
+    ...

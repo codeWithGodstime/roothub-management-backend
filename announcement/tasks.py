@@ -11,7 +11,7 @@ User = get_user_model()
 
 logger = get_task_logger(__name__)
 
-@shared_task
+# @shared_task
 def send_announcement_email(announcement_id):
     logger.info(f"Starting to process email sending for announcement ID: {announcement_id}")
     try:

@@ -32,7 +32,7 @@ class CreateStrategy(TestStrategy):
 
     def act(self):
         self.response = self.client.post(self.url, self.data, format='json')
-        print(self.response.data, self.response.status_code)
+        # print(self.response.data, self.response.status_code)
     
     def assert_(self):
         assert self.response.status_code == 201
@@ -57,7 +57,7 @@ class UpdateStrategy(TestStrategy):
         else:
             self.response = self.client.patch(self.url, self.data, format='json')
         
-        print(self.response.data)
+        # print(self.response.data)
 
     def assert_(self):
         # Check for successful response
@@ -104,7 +104,7 @@ class ListStrategy(TestStrategy):
 
     def act(self):
         self.response = self.client.get(self.url, format='json')
-        print("response is==", self.response.data)
+        # print("response is==", self.response.data)
 
     def assert_(self):
         # Check the response status code
@@ -147,7 +147,7 @@ class NotPermittedStrategy(TestStrategy, ABC):
         Executes the action by sending a request to the specified URL with the provided data.
         """
         self.response = self.client.post(self.url, self.data, format='json')
-        print(self.response.data, self.response.status_code)
+        # print(self.response.data, self.response.status_code)
 
     def assert_(self):
         """
@@ -166,7 +166,7 @@ class NotPermittedGetStrategy(NotPermittedStrategy):
         Executes the action by sending a request to the specified URL with the provided data.
         """
         self.response = self.client.get(self.url, format='json')
-        print(self.response.data, self.response.status_code)
+        (self.response.data, self.response.status_code)
 
 
 class NotPermittedPostStrategy(NotPermittedStrategy):
@@ -175,7 +175,7 @@ class NotPermittedPostStrategy(NotPermittedStrategy):
         Executes the action by sending a request to the specified URL with the provided data.
         """
         self.response = self.client.post(self.url, self.data, format='json')
-        print(self.response.data, self.response.status_code)
+        # print(self.response.data, self.response.status_code)
 
 
 class TestStrategyRunner:

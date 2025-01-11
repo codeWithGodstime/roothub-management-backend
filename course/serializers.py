@@ -78,7 +78,6 @@ class CourseSessionSerializer:
         def validate(self, data):
             student = data.get('student_id')
             session = self.context.get("session")
-            print(session, "session==")
 
             # Check if the student is already associated with the session
             if Student.objects.filter(id=student.id, session=session).exists():
