@@ -132,8 +132,7 @@ class UserViewset(viewsets.ModelViewSet):
 
         copy_data = request.data.copy()
         generated_password = generate_passwords()
-        logger.debug(f"Generated password for new student: {
-                     generated_password}")
+        logger.debug(f"Generated password for new student: {generated_password}")
 
         serializer = StudentSerializer.StudentCreateSerializer(
             data=copy_data,
@@ -147,8 +146,7 @@ class UserViewset(viewsets.ModelViewSet):
             prog = student.program
             course = prog.courses.all().order_by('level').first()
             if course:
-                logger.info(f"Assigning student {
-                            student.id} to course {course.id}")
+                logger.info(f"Assigning student {student.id} to course {course.id}")
                 # m2m relationship
                 StudentCourse.objects.create(
                     student=student,
@@ -166,8 +164,7 @@ class UserViewset(viewsets.ModelViewSet):
             logger.info(f"Email sent successfully to: {student.user.email}")
 
             # TODO: Send notification to instructor of the course
-            logger.info(f"Notification to instructor about student {
-                        student.id} needs to be sent.")
+            logger.info(f"Notification to instructor about student {student.id} needs to be sent.")
 
             message = f"Student registration is successful, user credentials have been sent to {
                 copy_data['user']['email']}"
