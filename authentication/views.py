@@ -174,8 +174,7 @@ class UserViewset(viewsets.ModelViewSet):
             logger.info(message)
             return Response({"detail": message}, status=status.HTTP_201_CREATED)
         else:
-            logger.error(f"Student registration failed due to invalid data: {
-                         serializer.errors}")
+            logger.error(f"Student registration failed due to invalid data: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -186,13 +185,11 @@ class UserViewset(viewsets.ModelViewSet):
     @action(methods=['post'], detail=False)
     @transaction.atomic()
     def instructors(self, request, *args, **kwargs):
-        logger.info(f"Instructor registration attempt with data: {
-                    request.data}")
+        logger.info(f"Instructor registration attempt with data: {request.data}")
 
         copy_data = request.data.copy()
         generated_password = generate_passwords()
-        logger.debug(f"Generated password for new instructor: {
-                     generated_password}")
+        logger.debug(f"Generated password for new instructor: {generated_password}")
 
         serializer = InstructorSerializer.InstructorCreateSerializer(
             data=copy_data, context={"generated_password": generated_password})
@@ -215,8 +212,7 @@ class UserViewset(viewsets.ModelViewSet):
             logger.info(message)
             return Response({"detail": message}, status=status.HTTP_201_CREATED)
         else:
-            logger.error(f"Instructor registration failed due to invalid data: {
-                         serializer.errors}")
+            logger.error(f"Instructor registration failed due to invalid data: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=["post"], detail=False, permission_classes=[permissions.AllowAny])
@@ -230,8 +226,7 @@ class UserViewset(viewsets.ModelViewSet):
             user = User.objects.filter(email__iexact=email).first()
 
             if user:
-                logger.info(f"User found for email: {
-                            email}, initiating password reset.")
+                logger.info(f"User found for email: {email}, initiating password reset.")
                 token_generator = PasswordResetTokenGenerator()
                 token = token_generator.make_token(user)
                 logger.debug(f"Generated token: {token}")
