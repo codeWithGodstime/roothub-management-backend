@@ -110,13 +110,11 @@ class UserViewset(viewsets.ModelViewSet):
                             message, "admin@developer.com")
             logger.info(f"Email sent successfully to: {user.email}")
 
-            message = f"User registration is successful, user credentials have been sent to {
-                copy_data['email']}"
+            message = f"User registration is successful, user credentials have been sent to {copy_data['email']}"
             logger.info(message)
             return Response({"detail": message}, status=status.HTTP_201_CREATED)
         else:
-            logger.error(f"User registration failed due to invalid data: {
-                         serializer.errors}")
+            logger.error(f"User registration failed due to invalid data: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -158,8 +156,7 @@ class UserViewset(viewsets.ModelViewSet):
                 password: {generated_password}
             """
             logger.info(f"Sending email to student: {student.user.email}")
-            student.user.email_user(
-                "Roothub Account Login Credentials", message, "admin@developer.com")
+            student.user.email_user("Roothub Account Login Credentials", message, "admin@developer.com")
             logger.info(f"Email sent successfully to: {student.user.email}")
 
             # TODO: Send notification to instructor of the course
