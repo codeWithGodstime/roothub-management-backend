@@ -166,8 +166,7 @@ class UserViewset(viewsets.ModelViewSet):
             # TODO: Send notification to instructor of the course
             logger.info(f"Notification to instructor about student {student.id} needs to be sent.")
 
-            message = f"Student registration is successful, user credentials have been sent to {
-                copy_data['user']['email']}"
+            message = f"Student registration is successful, user credentials have been sent to {copy_data['user']['email']}"
             logger.info(message)
             return Response({"detail": message}, status=status.HTTP_201_CREATED)
         else:
@@ -200,12 +199,10 @@ class UserViewset(viewsets.ModelViewSet):
                 password: {generated_password}
             """
             logger.info(f"Sending email to instructor: {instructor.user.email}")
-            instructor.user.email_user(
-                "Roothub Account Login Credentials", message, "admin@developer.com")
+            instructor.user.email_user("Roothub Account Login Credentials", message, "admin@developer.com")
             logger.info(f"Email sent successfully to: {instructor.user.email}")
 
-            message = f"Instructor registration is successful, user credentials have been sent to {
-                copy_data['user']['email']}"
+            message = f"Instructor registration is successful, user credentials have been sent to {copy_data['user']['email']}"
             logger.info(message)
             return Response({"detail": message}, status=status.HTTP_201_CREATED)
         else:
@@ -238,8 +235,7 @@ class UserViewset(viewsets.ModelViewSet):
 
                 logger.info(f"Sending password reset email to: {email}")
                 user.email_user(subject, message, email_from)
-                logger.info(
-                    f"Password reset email sent successfully to: {email}")
+                logger.info(f"Password reset email sent successfully to: {email}")
 
                 return Response({'message': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
             else:
@@ -285,8 +281,7 @@ class ProgramViewset(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         program = serializer.save()
 
-        logger.info(
-            f"Program '{program.name}' created successfully with ID {program.id}.")
+        logger.info(f"Program '{program.name}' created successfully with ID {program.id}.")
 
         levels = ["beginner", "basic", "intermediate", "advanced"]
         logger.info(f"Creating courses for program '{program.name}' with levels: {levels}")
