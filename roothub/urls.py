@@ -9,7 +9,7 @@ from data.views import GenerateData
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path("v1/", include("authentication.urls")),
+    path("v1/", include("authentication.urls")),
     path("v1/", include("course.urls")),
     path("v1/", include("announcement.urls"))
 ] + [
