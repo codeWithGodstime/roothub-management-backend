@@ -166,8 +166,7 @@ class UserViewset(viewsets.ModelViewSet):
             # TODO: Send notification to instructor of the course
             logger.info(f"Notification to instructor about student {student.id} needs to be sent.")
 
-            message = f"Student registration is successful, user credentials have been sent to {
-                copy_data['user']['email']}"
+            message = f"Student registration is successful, user credentials have been sent to {copy_data['user']['email']}"
             logger.info(message)
             return Response({"detail": message}, status=status.HTTP_201_CREATED)
         else:
@@ -228,8 +227,7 @@ class UserViewset(viewsets.ModelViewSet):
                 token = token_generator.make_token(user)
                 logger.debug(f"Generated token: {token}")
 
-                reset_url = f"{
-                    settings.PASSWORD_RESET_BASE_URL}/{user.id}:{token}"
+                reset_url = f"{settings.PASSWORD_RESET_BASE_URL}/{user.id}:{token}"
                 logger.info(f"Password reset URL: {reset_url}")
 
                 subject = "Password Reset Request"
