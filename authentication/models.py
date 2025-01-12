@@ -128,7 +128,7 @@ class Student(BaseModelMixin):
 
         if latest_course and latest_course.instructor:
             # Return the instructor (tutor) for the latest course
-            return latest_course.instructor
+            return latest_course.instructor.user.fullname
         return None  # Return None if no tutor found or no course is found
 
     @property
