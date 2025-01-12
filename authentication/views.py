@@ -199,12 +199,10 @@ class UserViewset(viewsets.ModelViewSet):
                 password: {generated_password}
             """
             logger.info(f"Sending email to instructor: {instructor.user.email}")
-            instructor.user.email_user(
-                "Roothub Account Login Credentials", message, "admin@developer.com")
+            instructor.user.email_user("Roothub Account Login Credentials", message, "admin@developer.com")
             logger.info(f"Email sent successfully to: {instructor.user.email}")
 
-            message = f"Instructor registration is successful, user credentials have been sent to {
-                copy_data['user']['email']}"
+            message = f"Instructor registration is successful, user credentials have been sent to {copy_data['user']['email']}"
             logger.info(message)
             return Response({"detail": message}, status=status.HTTP_201_CREATED)
         else:
