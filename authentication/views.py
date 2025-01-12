@@ -238,8 +238,7 @@ class UserViewset(viewsets.ModelViewSet):
 
                 logger.info(f"Sending password reset email to: {email}")
                 user.email_user(subject, message, email_from)
-                logger.info(
-                    f"Password reset email sent successfully to: {email}")
+                logger.info(f"Password reset email sent successfully to: {email}")
 
                 return Response({'message': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
             else:

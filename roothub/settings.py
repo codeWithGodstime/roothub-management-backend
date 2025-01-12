@@ -77,8 +77,7 @@ if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
     CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS").split(",")
-    print(CORS_ALLOWED_ORIGINS)
-    
+
 ROOT_URLCONF = "roothub.urls"
 
 TEMPLATES = [
@@ -168,11 +167,8 @@ else:
     EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
     EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 
-DEFAULT_FROM_EMAIL = "noreply@roothub.com"
-PASSWORD_RESET_BASE_URL = "https://yourfrontend.com/reset-password"
-
-# CELERY_BROKER_URL = env("CELERY_BROKER", "redis://redis:6379/0")
-# CELERY_RESULT_BACKEND = env("CELERY_BACKEND", "redis://redis:6379/0")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
+PASSWORD_RESET_BASE_URL = env("PASSWORD_RESET_BASE_URL")
 
 LOGGING = {
     "version": 1,  # the dictenv format version

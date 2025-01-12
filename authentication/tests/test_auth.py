@@ -118,8 +118,7 @@ class TestUserViewsetCreation:
 
     def test_student_is_added_to_course_on_registration(self, api_client, admin_user, program_factory_fixture, course_factory_fixture):
         program = program_factory_fixture(duration=3)
-        course = course_factory_fixture(level=1, duration=1, name=f"{
-                                        program.name}-basic", program=program)
+        course = course_factory_fixture(level=1, duration=1, name=f"{program.name}-basic", program=program)
         request_data = TestHelper().generate_test_data('student', program.id)
         api_client.force_authenticate(user=admin_user)
         unique = request_data['user']['email']
