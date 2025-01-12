@@ -73,8 +73,12 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS").split(",")
-
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS").split(",")
+    print(CORS_ALLOWED_ORIGINS)
+    
 ROOT_URLCONF = "roothub.urls"
 
 TEMPLATES = [
