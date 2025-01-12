@@ -4,14 +4,14 @@ from datetime import timedelta
 import environ
 import dj_database_url
 
-env = environ.Env(DEBUG=(bool, False))
+env = environ.Env(DEBUG=(bool, True))
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 SECRET_KEY = env("SECRET_KEY", default="secret_key123")
 
-DEBUG = env("DEBUG", cast=bool, default=False)
+DEBUG = env("DEBUG", cast=bool, default=True)
 print(DEBUG)
 
 ALLOWED_HOSTS = env("ALLOWED_HOSTS", default="localhost").split(",")
@@ -76,7 +76,11 @@ MIDDLEWARE = [
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS").split(",")
+    # CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS").split(",")
+    ...
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_PRIVATE_NETWORK = True
 
 ROOT_URLCONF = "roothub.urls"
 
@@ -178,11 +182,14 @@ LOGGING = {
             "class": "logging.FileHandler",
             "filename": "general.log",
         },
+        "console": {
+            "class": "logging.StreamHandler"
+        }
     },
     "loggers": {
         "": {
             "level": "DEBUG",
-            "handlers": ["file"],
+            "handlers": ["file", "console"],
         },
     },
     "formatters": {
