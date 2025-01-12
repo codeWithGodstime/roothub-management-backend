@@ -188,8 +188,8 @@ LOGGING = {
     },
     "loggers": {
         "": {
-            "level": "DEBUG",
-            "handlers": ["file", "console"],
+            "level": "INFO",
+            "handlers": ["console", "file"],
         },
     },
     "formatters": {
