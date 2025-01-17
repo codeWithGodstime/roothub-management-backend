@@ -10,27 +10,6 @@ class SkillFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Skill
     name = factory.Sequence(lambda n: f"{['Python', 'JavaScript', 'Java', 'C++', 'Ruby'][n % 5]}-{n}")
-    # name = factory.Faker(
-    #     "random_element",
-    #     elements=[
-    #         "Python",
-    #         "JavaScript",
-    #         "Java",
-    #         "C++",
-    #         "Ruby",
-    #         "Go",
-    #         "Swift",
-    #         "PHP",
-    #         "TypeScript",
-    #         "Kotlin",
-    #         "C#",
-    #         "SQL",
-    #         "Rust",
-    #         "Dart",
-    #         "Scala",
-    #     ],
-    #     unique=True,
-    # )
 
 
 class InstructorFactory(factory.django.DjangoModelFactory):

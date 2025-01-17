@@ -17,13 +17,13 @@ from drf_spectacular.utils import extend_schema_field, extend_schema, extend_sch
 from utils.util_functions import generate_passwords
 from utils.permissions import IsAdminOrInstructorForSession
 
-from .serializers import UserSerializer, TokenObtainSerializer, ProgramSerializer, StudentSerializer, InstructorSerializer
+from .serializers import UserSerializer, TokenObtainSerializer, ProgramSerializer, StudentSerializer, InstructorSerializer, SkillSerializer
 from .filters import StudentFilter, InstructorFilter
 
 from course.models import Course, StudentCourse, CourseSession
 from course.serializers import CourseSessionSerializer
 
-from .models import Program, Student, Instructor
+from .models import Program, Student, Instructor, Skill
 
 
 logger = logging.getLogger(__name__)
@@ -258,7 +258,6 @@ class UserViewset(viewsets.ModelViewSet):
             logger.error(f"Password change request failed due to invalid data: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 @extend_schema(tags=['Program'])
 class ProgramViewset(viewsets.ModelViewSet):
     queryset = Program.objects.all()
@@ -419,6 +418,12 @@ class InstructorViewset(viewsets.ReadOnlyModelViewSet):
             sessions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+@extend_schema(tags=["Skills"])
+class SkillViewset(viewsets.ReadOnlyModelViewSet):
+    queryset = Skill.objects.all()
+    serializer_class = SkillSerializer
+    permission_classes = [permissions.IsAdminUser]
 
 class TokenObtainPairView(SimpleJWTTokenObtainPairView):
     serializer_class = TokenObtainSerializer

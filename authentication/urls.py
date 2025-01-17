@@ -6,7 +6,7 @@ from rest_framework_simplejwt.views import (
     TokenBlacklistView
 )
 
-from .views import UserViewset, ProgramViewset, TokenObtainPairView, StudentViewset, InstructorViewset, AdminAnalyticsView
+from .views import UserViewset, ProgramViewset, TokenObtainPairView, StudentViewset, InstructorViewset, AdminAnalyticsView, SkillViewset
 
 router = DefaultRouter()
 router.register("users", UserViewset, basename="users")
@@ -14,6 +14,7 @@ router.register("programs", ProgramViewset, basename="programs")
 router.register("students", StudentViewset, basename="students")
 router.register("instructors", InstructorViewset, basename="instructors")
 router.register("analytics", AdminAnalyticsView, basename="analytics")
+router.register("skills", SkillViewset, basename="skills")
 
 urlpatterns = [
   
