@@ -103,8 +103,9 @@ class ListStrategy(TestStrategy):
         self.model = model
 
     def act(self):
+        # print("url = ", self.url)
         self.response = self.client.get(self.url, format='json')
-        # print("response is==", self.response.data)
+        print("response is==", self.response.data)
 
     def assert_(self):
         # Check the response status code

@@ -283,8 +283,10 @@ class InstructorSerializer(serializers.ModelSerializer):
             ]
 
         def get_expertise(self, obj) -> str:
-            primary_skill = obj.instructorskill_set.filter(is_primary=True).select_related("skill_id").first()
-            return primary_skill.skill.name if primary_skill else None
+            primary_skill = obj.instructorskill_set.filter(is_primary=True).first()
+
+            print(primary_skill)
+            return primary_skill.skill_id.name if primary_skill else None
 
         
         def get_number_of_active_trainees(self, obj) -> int:

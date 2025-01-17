@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import User, Program, Instructor, InstructorSkill, Student, StudentPayment, Student
+from .models import User, Program, Instructor, InstructorSkill, Student, StudentPayment, Student, Skill
 
 from django.contrib import admin
 from .models import User
@@ -60,5 +60,10 @@ class StudentPaymentAdmin(admin.ModelAdmin):
 
 @admin.register(InstructorSkill)
 class InstructorSkillAdmin(admin.ModelAdmin):
+    # list_display = []
+    ...
+
+@admin.register(Skill)
+class SkillAdmin(admin.ModelAdmin):
     # list_display = []
     ...
