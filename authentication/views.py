@@ -13,12 +13,12 @@ from django.conf import settings
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 
-from drf_spectacular.utils import extend_schema_field, extend_schema, extend_schema_view, OpenApiParameter
+from drf_spectacular.utils import extend_schema_field, extend_schema, extend_schema_view, OpenApiParameter, OpenApiParameter, OpenApiResponse
 from utils.util_functions import generate_passwords
 from utils.permissions import IsAdminOrInstructorForSession
 
 from .serializers import UserSerializer, TokenObtainSerializer, ProgramSerializer, StudentSerializer, InstructorSerializer
-from .filters import StudentFilter
+from .filters import StudentFilter, InstructorFilter
 
 from course.models import Course, StudentCourse, CourseSession
 from course.serializers import CourseSessionSerializer
@@ -337,6 +337,59 @@ class InstructorViewset(viewsets.ReadOnlyModelViewSet):
     queryset = Instructor.objects.all()
     serializer_class = InstructorSerializer.InstructorRetrieveSerializer
     permission_classes = [permissions.IsAuthenticated]
+    # filter_backends = [DjangoFilterBackend]
+    # filterset_class = InstructorFilter
+
+    @extend_schema(
+        summary="List instructors with optional skill filter",
+        description="Retrieve a list of instructors. Optionally filter by skill by providing a `skill` query parameter.",
+        parameters=[
+            OpenApiParameter(
+                "skill", 
+                description="The name of the skill to filter instructors by", 
+                required=False, 
+                type=str
+            ),
+        ],
+        responses={
+            200: OpenApiResponse(
+                description="A list of instructors",
+                examples={
+                    "application/json": {
+                        "data": [
+                            {
+                                "id": 1,
+                                "user": "user1",
+                                "account_number": "1234567890",
+                                "account_name": "John Doe",
+                                "bank_name": "Bank of XYZ",
+                                "skills": ["Python", "Django"]
+                            },
+                            # more instructors
+                        ]
+                    }
+                }
+            ),
+        },
+    )
+    def list(self, request, *args, **kwargs):
+        skill_name = request.GET.get("skill")
+        logger.debug(skill_name, "Skills==")
+        if skill_name:
+            # Use the class method to filter instructors by the given skill
+            queryset = Instructor.filter_by_skills(skill_name)
+        else:
+            # Default to retrieving all instructors
+            queryset = self.get_queryset()
+
+        # Serialize the filtered or unfiltered queryset
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     @extend_schema(
         request=None,

@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-from .models import Student
+from .models import Student, Instructor
 
 
 class StudentFilter(filters.FilterSet):
@@ -8,3 +8,11 @@ class StudentFilter(filters.FilterSet):
     class Meta:
         model = Student
         fields = ['type', 'program']
+
+
+class InstructorFilter(filters.FilterSet):
+    skill = filters.CharFilter(field_name="skills__name", lookup_expr="iexact")
+
+    class Meta:
+        model = Instructor
+        fields = ["skill"]
