@@ -56,7 +56,8 @@ class StudentCourse(BaseModelMixin):
         ]
 
 
-class StudentCourseSession(models.Model):
+class StudentCourseSession(BaseModelMixin):
+    """This is used to track the current session the student is on"""
     student_course = models.ForeignKey(
         StudentCourse,
         on_delete=models.RESTRICT,
