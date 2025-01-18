@@ -17,7 +17,6 @@ class CourseSerializer:
             ]
 
     class CourseRetrieveSerializer(serializers.ModelSerializer):
-
         class Meta:
             model = Course
             fields = [
@@ -55,7 +54,7 @@ class CourseSessionSerializer:
             fields = ['start_date', "course"]
 
     class CourseSessionRetrieveSerializer(serializers.ModelSerializer):
-        course = serializers.SerializerMethodField()
+        # course = serializers.SerializerMethodField()
         class Meta:
             model = CourseSession
             fields = [
@@ -63,14 +62,14 @@ class CourseSessionSerializer:
                 "start_date",
                 "estimated_end_date",
                 "end_date",
-                "course",
+                # "course",
                 "is_active",
                 "created_at",
                 "updated_at"
             ]
 
-        def get_course(self, obj):
-            return obj.course.name
+        # def get_course(self, obj):
+        #     return obj.course.name
 
     class AddStudentToSessionSerializer(serializers.Serializer):
         student_id = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all())

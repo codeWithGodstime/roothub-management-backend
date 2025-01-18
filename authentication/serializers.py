@@ -309,9 +309,34 @@ class ProgramSerializer:
             fields = ("name", "duration", "total_amount")
 
     class ProgramRetrieveSerializer(serializers.ModelSerializer):
+        courses = serializers.SerializerMethodField()
+        sessions = serializers.SerializerMethodField()
         class Meta:
             model = Program
-            fields = "__all__"
+            fields = [
+                "id",
+                "name",
+                "duration",
+                "total_amount",
+                "curriculum",
+                "summary",
+                "courses",
+                "sessions"
+            ]
+
+        def get_courses(self, obj):
+            from course.serializers import CourseSerializer
+            
+            cs = obj.courses.all()
+            serializers = CourseSerializer.CourseRetrieveSerializer(cs, many=True)
+            return serializers.data
+
+        def get_sessions(self, obj):
+            from course.serializers import CourseSessionSerializer
+
+            sessions = obj.courses.prefetch_related("sessions").filter(sessions__is_active=True)
+            serializer = CourseSessionSerializer.CourseSessionRetrieveSerializer(sessions, many=True)
+            return serializer.data
 
         def to_representation(self, instance):
             """

@@ -78,6 +78,8 @@ class Program(BaseModelMixin):
     name = models.CharField(max_length=300, unique=True)
     duration = models.PositiveIntegerField(choices=DURATION_CHOICES)
     total_amount = models.DecimalField(max_digits=16, decimal_places=2)
+    curriculum = models.URLField(null=True, blank=True)
+    summary = models.TextField(null=True, blank=True)
 
 
 class Instructor(BaseModelMixin):
